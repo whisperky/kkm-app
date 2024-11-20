@@ -22,11 +22,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { IBonusCompletion, useBonusCompletion } from "@/services/bonus";
 import { useCheckBetaTester } from "@/services/beta-testers";
 
-const response = {
-  // Test invoice link format: https://t.me/invoice/test_invoice_[random_string]
-  invoiceLink: "https://t.me/$gU_iUlVi8UXaAAAAl43xRZv1W4M",
-};
-
 export interface IGeneralContext {
   webApp?: TelegramWebApp | null;
   user?: IUser | null;
@@ -67,8 +62,7 @@ export function GeneralContextProvider({
     [webApp?.initDataUnsafe?.user?.id]
   );
   const username = useMemo(
-    () =>
-      (webApp?.initDataUnsafe?.user?.username as TSessionId) || "benndalton2",
+    () => (webApp?.initDataUnsafe?.user?.username as TSessionId) || "benndalton2",
     [webApp?.initDataUnsafe?.user?.username]
   );
   const photo_url = useMemo(
@@ -138,18 +132,6 @@ export function GeneralContextProvider({
   }, [router, pathName]);
 
   useEffect(() => {
-    console.log("WebApp", WebApp, response.invoiceLink);
-    WebApp?.openInvoice(response.invoiceLink, (status: any) => {
-      if (status === "paid") {
-        //
-        console.log("paid");
-      } else {
-        console.log("not paid", status);
-      }
-    });
-  }, []);
-
-  useEffect(() => {
     addMyScore(Number(initialPoints?.total) || 0);
   }, [addMyScore, initialPoints?.total]);
 
@@ -180,7 +162,7 @@ export function GeneralContextProvider({
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     const check = async () => {
-      const pathName = window.location.pathname;
+      const pathName = window.location.pathname
       if (pathName !== "/not-tester" && pathName !== "/not-mobile") {
         if (!username) {
           timeoutId = setTimeout(() => {

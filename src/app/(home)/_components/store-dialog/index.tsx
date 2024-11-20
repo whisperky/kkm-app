@@ -23,11 +23,11 @@ export default function StoreModal({
     <Dialog>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent
-        containerClassName="flex flex-col !overflow-hidden !max-h-[75dvh]"
+        containerClassName="flex flex-col !overflow-hidden !max-h-[90dvh]"
         isStoreBoard
       >
         <BoxMain hideClose className="rounded-t-3xl">
-          <div className="z-20 mb-4 text-center font-bumper-sticker text-3xl text-[#491F36]">
+          <div className="z-20 mb-5 text-center font-bumper-sticker text-3xl text-[#491F36]">
             Store
           </div>
           <BalanceSection />

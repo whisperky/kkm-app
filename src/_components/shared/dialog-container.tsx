@@ -116,7 +116,7 @@ export default function DialogContainer({
           "relative",
           getContainerClassName(),
           hideImage && "h-auto",
-          isStoreBoard && "pt-[2%]"
+          isStoreBoard && "pt-[1%]"
         )}
       >
         <div style={getInnerStyles()} className={getInnerClassName()}>
