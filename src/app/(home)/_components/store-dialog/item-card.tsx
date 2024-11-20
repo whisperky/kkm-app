@@ -127,13 +127,11 @@ export default function StoreItem({
   const renderButtonContent = () => {
     if (type === "bundle") {
       return (
-        <DialogClose asChild>
-          <ClaimDialog type={id}>
-            <div className="flex items-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
-              {`$${price}`}
-            </div>
-          </ClaimDialog>
-        </DialogClose>
+        <ClaimDialog type={id}>
+          <div className="flex items-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
+            {`$${price}`}
+          </div>
+        </ClaimDialog>
       );
     }
 
