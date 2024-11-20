@@ -180,11 +180,9 @@ export default function StoreItem({
         />
       )}
 
-      {star && !(type === "claim" && unlockable) && <StarDecorations />}
-
       <div
         className={cn(
-          "w-full py-2 bg-[#FCEAD0] rounded-t-lg rounded-b-none flex items-center justify-center text-2xl border-b-[1px] border-[#B89D9880]",
+          "w-full py-2 bg-light-orange rounded-t-lg rounded-b-none flex items-center justify-center text-2xl border-b-[1px] border-[#B89D9880]",
           size === 44 ? "py-4" : ""
         )}
       >
@@ -205,7 +203,7 @@ export default function StoreItem({
                 height={20}
                 className="absolute top-0 -right-[20%] scale-x-[-1]"
               />
-              <div className="absolute bottom-0 left-[calc(50%-56px)] w-28 h-28 bg-[radial-gradient(50%_50%_at_50%_72.12%,#FFFFFFFF_0%,#FFC10080_50%,#FFC10000_100%)] blur-[5px] z-0" />
+              <div className="absolute bottom-0 left-[calc(50%-56px)] w-28 h-28 bg-[radial-gradient(50%_50%_at_50%_72.12%,#FFFFFFFF_0%,#FFC10080_50%,#FFC10000_100%)] blur-sm z-0" />
             </>
           )}
         </div>
@@ -216,7 +214,7 @@ export default function StoreItem({
       <Button
         onClick={onClick}
         className={cn(
-          "w-full h-6 px-3 py-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-600 active:bg-neutral-700",
+          "w-full h-6 px-3 py-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-500 active:bg-neutral-600",
           type === "claim"
             ? claimed
               ? "bg-green"
@@ -229,8 +227,11 @@ export default function StoreItem({
         {renderButtonContent()}
       </Button>
 
-      {type === "claim" && unlockable && (
+      {/* {star && !(type === "claim" && unlockable) && <StarDecorations />} */}
+      {type === "claim" && unlockable ? (
         <UnlockableOverlay lock={lock} id={id} />
+      ) : (
+        star && <StarDecorations />
       )}
     </div>
   );

@@ -77,7 +77,7 @@ export default function ClaimDialog({
               </div>
             ) : (
               <>
-                <div className="relative flex flex-col items-center justify-center m-2 rounded-2xl bg-[#FCEAD0]">
+                <div className="relative flex flex-col items-center justify-center m-2 rounded-2xl bg-light-orange">
                   <Image
                     src={catchUpBundlesData[type - 1].icon}
                     alt={catchUpBundlesData[type - 1].title}
@@ -105,7 +105,7 @@ export default function ClaimDialog({
                 <div className="flex flex-col gap-2 items-center justify-center m-2 p-2 rounded-2xl bg-light-tan">
                   <Button
                     className={cn(
-                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99]"
+                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99] hover:bg-neutral-500 active:bg-neutral-600"
                     )}
                   >
                     Buy
@@ -118,7 +118,7 @@ export default function ClaimDialog({
             )}
           </BoxContent>
           <DialogClose asChild>
-            <button className="absolute -bottom-2 left-[calc(50%-43px)] w-[86px] h-3">
+            <button className="absolute w-[86px] h-3 -bottom-2 left-[calc(50%-43px)]">
               <Image
                 src={close}
                 alt="Close"
