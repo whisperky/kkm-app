@@ -128,7 +128,7 @@ export default function StoreItem({
     if (type === "bundle") {
       return (
         <ClaimDialog type={id}>
-          <div className="flex items-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
+          <div className="flex w-full items-center justify-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
             {`$${price}`}
           </div>
         </ClaimDialog>
@@ -138,14 +138,12 @@ export default function StoreItem({
     if (type === "store") {
       if (purchased) {
         return (
-          <DialogClose asChild>
-            <ClaimDialog type="store">
-              <div className="flex items-center drop-shadow-[0_1px_0px_#00000029]">
-                <Image src={claimIcon} alt="Claim" width={16} height={16} />
-                Claim
-              </div>
-            </ClaimDialog>
-          </DialogClose>
+          <ClaimDialog type="store">
+            <div className="flex w-full items-center justify-center drop-shadow-[0_1px_0px_#00000029]">
+              <Image src={claimIcon} alt="Claim" width={16} height={16} />
+              Claim
+            </div>
+          </ClaimDialog>
         );
       }
       return `$${price}`;
