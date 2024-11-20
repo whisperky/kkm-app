@@ -209,7 +209,7 @@ export default function StoreItem({
       <Button
         onClick={onClick}
         className={cn(
-          "w-full h-6 py-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-500 active:bg-neutral-600",
+          "w-full h-6 p-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-500 active:bg-neutral-600",
           type === "claim"
             ? claimed
               ? "bg-green"
