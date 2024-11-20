@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import Provider from "./provider";
 // import type { Metadata } from "next";
 import { bumperStickerFont, madeTommySoftFont } from "@/lib/fonts";
-// import SplashScreen from "./(home)/_components/splash";
+import SplashScreen from "./(home)/_components/splash";
 import { useEffect } from "react";
 
 // export const metadata: Metadata = {
@@ -58,7 +58,7 @@ export default function RootLayout({
           overflow: "hidden",
         }}
       >
-        {/* <SplashScreen /> */}
+        <SplashScreen />
         <Provider>{children}</Provider>
       </body>
     </html>

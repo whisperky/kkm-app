@@ -1,18 +1,18 @@
 import React from "react";
-// import { cn } from "@/lib/utils";
 import Image from "next/image";
+
 import { BoxContent, BoxMain } from "@/src/_components/shared/board-structure";
-import BalanceSection from "./balance-section";
-import StoreSection from "./store-items";
 import {
   Dialog,
   DialogClose,
   DialogContent,
   DialogTrigger,
 } from "@/src/_components/ui/dialog";
-// import { AccordionItem } from "@radix-ui/react-accordion";
+
+import BalanceSection from "./balance-section";
+import StoreSection from "./store-items";
+
 import close from "@/_assets/icons/close-button.png";
-import { WalletConnectButton } from "@/src/_components/shared/wallet-connect-button";
 
 export default function StoreModal({
   children,
@@ -27,18 +27,17 @@ export default function StoreModal({
         isStoreBoard
       >
         <BoxMain hideClose className="rounded-t-3xl">
-          <div className="z-20 mb-4 text-center font-bumper-sticker text-3xl text-[#491F36] stroke-[linear-gradient(to right, #B4704A, #F4A860)]">
+          <div className="z-20 mb-4 text-center font-bumper-sticker text-3xl text-[#491F36]">
             Store
           </div>
           <BalanceSection />
-          <BoxContent className="p-0 mx-1 pb-3 overflow-auto mb-2 grid align-center rounded-3xl border border-solid border-white/40 bg-gradient-to-b from-[#C4A797] to-[#DDC2A7]">
+          <BoxContent className="grid p-0 pb-2 mx-1 mb-2 align-center rounded-3xl border border-solid border-white/40 bg-gradient-to-b from-[#C4A797] to-[#DDC2A7] overflow-auto">
             <StoreSection />
             <DialogClose asChild>
               <button className="mx-auto">
-                <Image src={close} alt="Close" className="w-[44px] h-[44px]" />
+                <Image src={close} alt="Close" className="w-11 h-11" />
               </button>
             </DialogClose>
-            <WalletConnectButton />
           </BoxContent>
         </BoxMain>
       </DialogContent>

@@ -15,12 +15,12 @@ export default function BalanceSection({
 
   return (
     <section
-      className={cn(`flex flex-wrap gap-2 m-0 justify-around px-4`, className)}
+      className={cn(`flex flex-wrap gap-2 px-4 m-0 justify-around`, className)}
     >
-      <article className="flex-1 flex flex-col items-center text-golden-brown font-semibold space-y-1 text-sm">
+      <article className="flex-1 flex flex-col items-center text-sm text-golden-brown font-semibold space-y-1">
         <p>Your Total Balance</p>
-        <p className="p-1 px-2 rounded-full bg-golden-brown text-white min-w-32 w-[100%]">
-          <span className="flex items-center gap-2 justify-center w-full">
+        <p className="min-w-32 w-full p-1 px-2 rounded-full bg-golden-brown text-white">
+          <span className="flex w-full items-center gap-2 justify-center">
             <span>
               {isNaN(Number(myScore))
                 ? myScore
@@ -50,10 +50,10 @@ export default function BalanceSection({
           </span>
         </p>
       </article>
-      <article className="flex-1 flex flex-col items-center text-golden-brown font-semibold space-y-1 w-fit text-sm">
+      <article className="flex flex-1 flex-col w-fit items-center text-sm text-golden-brown font-semibold space-y-1">
         <p>Winnings</p>
-        <p className="p-1 px-2 rounded-full bg-golden-brown text-white w-full">
-          <span className={"flex items-center gap-2 justify-center w-full"}>
+        <p className="w-full p-1 px-2 rounded-full bg-golden-brown text-white">
+          <span className="flex w-full gap-2 items-center justify-center">
             <span>
               ${" "}
               {isNaN(Number(myUsdt))

@@ -90,6 +90,7 @@ function Spinner({
   );
 
   const handelClick = useCallback(async () => {
+
     isSpinning.current = true;
     setHasSpin(false);
     setIsLoading(true);
@@ -104,13 +105,9 @@ function Spinner({
 
       // console.log('123', baseRotation, degree)
 
-      const targetRotationDegree =
-        baseRotation <= 0 ? 360 + baseRotation : baseRotation;
-      const temp = 15;
-      if (
-        degree > targetRotationDegree - temp &&
-        degree < targetRotationDegree - temp + 4
-      ) {
+      const targetRotationDegree = baseRotation <= 0 ? 360 + baseRotation : baseRotation
+      const temp = 15
+      if (degree > targetRotationDegree - temp && degree < targetRotationDegree - temp + 4) {
         if (target && target >= 0) setToTarget(target);
         else {
           isSpinning.current = false;

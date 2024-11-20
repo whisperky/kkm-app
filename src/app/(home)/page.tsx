@@ -19,7 +19,7 @@ export default function Home() {
   });
 
   return (
-    <div className="gap-4 pt-4 px-2 flex flex-col max-h-[calc(100vh_-_1rem)] h-full relative">
+    <div className="relative h-full gap-4 pt-4 px-2 flex flex-col max-h-[calc(100vh_-_1rem)]">
       <TopSection />
       <div className="-mx-4">
         <NFTSection />

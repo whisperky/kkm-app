@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import { BoxContent, BoxMain } from "@/src/_components/shared/board-structure";
 import { Button } from "@/src/_components/ui/button";
 import {
@@ -9,8 +9,7 @@ import {
   DialogContent,
   DialogTrigger,
 } from "@/src/_components/ui/dialog";
-// import { AccordionItem } from "@radix-ui/react-accordion";
-import StoreItem from "../store-dialog/item-card";
+import StoreItem from "@/src/app/(home)/_components/store-dialog/item-card";
 
 import { collectorPassData, catchUpBundlesData } from "@/src/app/(home)/data";
 
@@ -95,7 +94,7 @@ export default function ClaimDialog({
                     className="absolute bottom-[calc(50%-94px)] left-[calc(50%-94px)] z-0"
                   />
                 </div>
-                <div className="flex flex-col items-center justify-center text-[16px] font-[700] text-[#745061] font-made-tommy">
+                <div className="flex flex-col items-center justify-center text-base font-bold text-[#745061] font-made-tommy">
                   <p>
                     {catchUpBundlesData[type - 1].collectibles} Kokomo
                     Collectibles
@@ -103,15 +102,15 @@ export default function ClaimDialog({
                   <p>{catchUpBundlesData[type - 1].kokos} Kokos</p>
                   <p>{catchUpBundlesData[type - 1].spins} Spins</p>
                 </div>
-                <div className="flex flex-col gap-2 items-center justify-center m-2 p-2 rounded-2xl bg-[#E3BEAA]">
+                <div className="flex flex-col gap-2 items-center justify-center m-2 p-2 rounded-2xl bg-light-tan">
                   <Button
                     className={cn(
-                      "w-full bg-[#24BE62] px-3 py-0 text-[20px] text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99]"
+                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99]"
                     )}
                   >
                     Buy
                   </Button>
-                  <div className="text-[16px] font-[700] text-[#745061] text-center">
+                  <div className="text-base font-bold text-[#745061] text-center">
                     ${catchUpBundlesData[type - 1].price}
                   </div>
                 </div>
@@ -119,11 +118,11 @@ export default function ClaimDialog({
             )}
           </BoxContent>
           <DialogClose asChild>
-            <button className="absolute bottom-[-9px] left-[calc(50%-43px)] w-[86px] h-[12px]">
+            <button className="absolute -bottom-2 left-[calc(50%-43px)] w-[86px] h-3">
               <Image
                 src={close}
                 alt="Close"
-                className="absolute top-[-15px] left-[calc(50%-22px)] w-[44px] h-[44px]"
+                className="absolute -top-4 left-[calc(50%-22px)] w-11 h-11"
               />
               <Image src={bottomBoard} alt="Bottom board" />
             </button>

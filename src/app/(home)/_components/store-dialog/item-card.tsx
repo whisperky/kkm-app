@@ -3,6 +3,7 @@ import { cn } from "@/lib/utils";
 import { DialogClose } from "@/src/_components/ui/dialog";
 import { Button } from "@/src/_components/ui/button";
 
+import ClaimDialog from "../claim-dialog";
 import starIcon from "@/_assets/icons/star-y.png";
 import starIcon2 from "@/_assets/icons/star-w.png";
 import starIcon3 from "@/_assets/icons/star-p.png";
@@ -10,7 +11,6 @@ import claimIcon from "@/_assets/icons/claim.png";
 import lockIcon from "@/_assets/icons/lock.png";
 import unlockIcon from "@/_assets/icons/unlock.png";
 import checkIcon from "@/_assets/icons/check.png";
-import ClaimDialog from "../claim-dialog";
 
 interface StoreItemProps {
   id: number;
@@ -49,7 +49,7 @@ const StarDecorations = () => (
       alt="Star"
       width={6}
       height={6}
-      className="absolute z-10 top-[1%] -right-[1%] scale-x-[-1]"
+      className="absolute z-10 top-[1%] -right-[1%] -scale-x-100"
     />
   </>
 );
@@ -59,9 +59,16 @@ const ItemTitle = ({
   id,
   title,
 }: Pick<StoreItemProps, "type" | "id" | "title">) => (
-  <div className="text-[12px] py-2 font-medium px-1 bg-[#E3BEAA] text-[#5F3F57] text-center z-2 border-t-[1px] border-[#FCEAD080]">
+  <div className="flex-grow text-xs py-1.5 px-1 font-medium bg-light-tan text-golden-brown text-center z-2 border-t-[1px] border-[#FCEAD080]">
     {type === "bundle" ? (
-      title
+      title === "Kokomo Mega Bundle" ? (
+        title
+      ) : (
+        <p>
+          {title.split("Kokos ")[0]}Kokos <br />
+          {title.split("Kokos ")[1]}
+        </p>
+      )
     ) : type === "claim" ? (
       <p>
         Kokomo <br /> Collectible #{id}
@@ -78,22 +85,22 @@ const UnlockableOverlay = ({
   lock,
   id,
 }: Pick<StoreItemProps, "lock" | "id">) => (
-  <div className="absolute top-0 right-0 left-0 bottom-0 bg-[#000000E5] rounded-lg z-[999]">
+  <div className="absolute top-0 right-0 left-0 bottom-0 bg-[#000000E5] rounded-lg z-30">
     <div className="flex flex-col gap-2 items-center justify-center w-full h-full">
       {lock ? (
         <>
           <Image src={lockIcon} alt="Lock" width={32} height={32} />
-          <p className="text-[#FF5C97] text-[10px] text-center font-[700] px-2">
+          <p className="text-pink text-[10px] text-center font-bold px-2">
             Buy next Collector Pass to unlock
           </p>
         </>
       ) : (
         <>
           <Image src={unlockIcon} alt="Unlock" width={28} height={28} />
-          <p className="text-[#A291FF] text-[10px] text-center font-[700] px-2">
+          <p className="text-purple text-[10px] text-center font-bold px-2">
             Come back to Collect!
           </p>
-          <p className="text-[#A291FF] text-[10px] text-center font-[500] px-2">
+          <p className="text-purple text-[10px] text-center font-medium px-2">
             Day {id}
           </p>
         </>
@@ -123,7 +130,7 @@ export default function StoreItem({
         <DialogClose asChild>
           <ClaimDialog type={id}>
             <div className="flex items-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
-              {`$${Number(price).toFixed(2)}`}
+              {`$${price}`}
             </div>
           </ClaimDialog>
         </DialogClose>
@@ -143,7 +150,7 @@ export default function StoreItem({
           </DialogClose>
         );
       }
-      return `$${Number(price).toFixed(2)}`;
+      return `$${price}`;
     }
 
     if (claimed) {
@@ -162,11 +169,7 @@ export default function StoreItem({
   };
 
   return (
-    <div
-      className={cn(
-        "relative flex flex-col items-center justify-center bg-[#E3BEAA] rounded-lg"
-      )}
-    >
+    <div className="relative flex flex-col items-center justify-between bg-light-tan rounded-lg">
       {isPopular && (
         <Image
           src={starIcon3}
@@ -177,11 +180,11 @@ export default function StoreItem({
         />
       )}
 
-      {star && <StarDecorations />}
+      {star && !(type === "claim" && unlockable) && <StarDecorations />}
 
       <div
         className={cn(
-          "w-[100%] py-2 bg-[#FCEAD0] rounded-t-lg rounded-b-none flex items-center justify-center text-2xl border-b-[1px] border-[#B89D9880]",
+          "w-full py-2 bg-[#FCEAD0] rounded-t-lg rounded-b-none flex items-center justify-center text-2xl border-b-[1px] border-[#B89D9880]",
           size === 44 ? "py-4" : ""
         )}
       >
@@ -202,7 +205,7 @@ export default function StoreItem({
                 height={20}
                 className="absolute top-0 -right-[20%] scale-x-[-1]"
               />
-              <div className="absolute bottom-0 left-[calc(50%-56px)] w-[112px] h-[112px] bg-[radial-gradient(50%_50%_at_50%_72.12%,#FFFFFFFF_0%,#FFC10080_50%,#FFC10000_100%)] blur-[5px] z-0" />
+              <div className="absolute bottom-0 left-[calc(50%-56px)] w-28 h-28 bg-[radial-gradient(50%_50%_at_50%_72.12%,#FFFFFFFF_0%,#FFC10080_50%,#FFC10000_100%)] blur-[5px] z-0" />
             </>
           )}
         </div>
@@ -213,14 +216,14 @@ export default function StoreItem({
       <Button
         onClick={onClick}
         className={cn(
-          "w-full h-6 px-3 py-0 text-[14px] text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-[99]",
+          "w-full h-6 px-3 py-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-600 active:bg-neutral-700",
           type === "claim"
             ? claimed
-              ? "bg-[#24BE62]"
-              : "bg-[#A291FF]"
+              ? "bg-green"
+              : "bg-purple"
             : purchased
-            ? "bg-[#A291FF]"
-            : "bg-[#24BE62]"
+            ? "bg-purple"
+            : "bg-green"
         )}
       >
         {renderButtonContent()}
