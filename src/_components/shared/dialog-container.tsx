@@ -32,6 +32,16 @@ const BOARD_SIZES = {
   "2xl": Board2XL,
 } as const;
 
+const getBoardImage = (
+  isClaimBoard: boolean | undefined,
+  isStoreBoard: boolean | undefined,
+  defaultBoard: any
+) => {
+  if (isClaimBoard) return ClaimBoard;
+  if (isStoreBoard) return StoreBoard;
+  return defaultBoard;
+};
+
 export default function DialogContainer({
   children,
   title,
@@ -43,8 +53,7 @@ export default function DialogContainer({
   hideImage,
   tabBarModal,
 }: DialogContainerProps) {
-  const defaultBoard = BoardLG;
-  const boardSrc = BOARD_SIZES[size] || defaultBoard;
+  const boardSrc = BOARD_SIZES[size] || BoardLG;
 
   //set custom vh property on mount to fix mobile viewport height issues
   useEffect(() => {
@@ -68,14 +77,27 @@ export default function DialogContainer({
     return "p-[4%]";
   };
 
+  const getInnerStyles = () => ({
+    maxHeight: tabBarModal ? "540px" : "80vh",
+    maxWidth: tabBarModal ? "86vw" : "",
+  });
+
+  const getInnerClassName = () => {
+    const baseClasses = [className, "overflow-auto"];
+    const sizeClasses = {
+      md: "px-[4%] py-[6%]",
+      sm: "py-[8%]",
+      xs: "p-[1.5%]",
+    };
+    return cn(...baseClasses, sizeClasses[size as keyof typeof sizeClasses]);
+  };
+
   return (
     <div className={cn("relative")}>
       {!hideImage && (
         <div className="absolute inset-0 -z-20">
           <Image
-            src={
-              isClaimBoard ? ClaimBoard : isStoreBoard ? StoreBoard : boardSrc
-            }
+            src={getBoardImage(isClaimBoard, isStoreBoard, boardSrc)}
             priority
             alt="board"
             layout="fill"
@@ -97,19 +119,7 @@ export default function DialogContainer({
           isStoreBoard && "pt-[2%]"
         )}
       >
-        <div
-          style={{
-            maxHeight: tabBarModal ? "540px" : "80vh",
-            maxWidth: tabBarModal ? "86vw" : "",
-          }}
-          className={cn(
-            className,
-            "overflow-auto",
-            size === "md" && "px-[4%] py-[6%]",
-            size == "sm" && "py-[8%]",
-            size == "xs" && "p-[1.5%]"
-          )}
-        >
+        <div style={getInnerStyles()} className={getInnerClassName()}>
           {children}
         </div>
       </div>
