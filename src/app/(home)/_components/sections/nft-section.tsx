@@ -43,7 +43,7 @@ export default function NFTSection() {
           <div className="bg-gradient-to-b from-golden-brown to-[#886670] h-fit w-full p-[.07rem] rounded-full contain-content mt-1">
             <div className="h-3 w-full rounded-full contain-content bg-[#A98A87] shadow-[inset_0_3px_1px_#0003]">
               <div
-                className="h-full bg-gradient-to-b from-[#A291FF] from-[55%] to-[80%] to-[#9381F2] z-10 shadow-[3px_0_1px_#0003]"
+                className="h-full bg-gradient-to-b from-purple from-[55%] to-[80%] to-[#9381F2] z-10 shadow-[3px_0_1px_#0003]"
                 style={{
                   width: `${claimedNft < 3 ? (claimedNft / 3) * 100 : 100}%`,
                 }}
