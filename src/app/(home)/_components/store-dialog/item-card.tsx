@@ -1,6 +1,5 @@
 import Image, { StaticImageData } from "next/image";
 import { cn } from "@/lib/utils";
-import { DialogClose } from "@/src/_components/ui/dialog";
 import { Button } from "@/src/_components/ui/button";
 
 import ClaimDialog from "../claim-dialog";
