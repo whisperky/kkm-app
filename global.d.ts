@@ -14,15 +14,6 @@ interface TelegramWebApp {
   };
   ready: () => void;
   openLink: (_url: string) => void;
-  StarWallet?: {
-    connect: () => Promise<{ address: string }>;
-    disconnect: () => Promise<void>;
-    transfer: (params: {
-      to: string;
-      amount: string;
-      currency?: string;
-    }) => Promise<{ transactionHash: string }>;
-  };
 }
 
 interface Window {

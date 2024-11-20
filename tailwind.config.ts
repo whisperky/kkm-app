@@ -82,6 +82,10 @@ const config: Config = {
         sunshine: "#EDC499",
         copper: "#CD8258",
         green: "#24BE62",
+        purple: "#A291FF",
+        pink: "#FF5C97",
+        "light-tan": "#E3BEAA",
+        "light-orange": "#FCEAD0",
       },
       borderRadius: {
         lg: "var(--radius)",
