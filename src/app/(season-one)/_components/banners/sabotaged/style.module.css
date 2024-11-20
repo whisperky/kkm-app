@@ -1,0 +1,46 @@
+@keyframes width-change {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 70%;
+  }
+}
+
+.parent .text {
+  width: 0;
+  animation: width-change 1.2s ease-in-out 0.5s forwards;
+}
+
+@keyframes translate-change {
+  0% {
+    transform: translateX(45dvw);
+  }
+  100% {
+    transform: translateX(0dvw);
+  }
+}
+
+.parent .text > span {
+  display: inline-block;
+  transform: translateX(45dvw);
+  animation: translate-change 1.2s ease-in-out 0.5s forwards;
+}
+
+.parent .stars {
+  animation-duration: 0.3s;
+}
+
+@keyframes scale-change {
+  0% {
+    scale: 0;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+.parent .emoji {
+  scale: 0;
+  animation: scale-change .3s ease-in-out 0.2s forwards;
+}

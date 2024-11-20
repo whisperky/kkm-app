@@ -1,0 +1,83 @@
+/* MADE Tommy Soft start */
+@font-face {
+  font-family: "MADE Tommy Soft Thin PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft Thin PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft Thin PERSONAL USE.woff")
+      format("woff");
+}
+@font-face {
+  font-family: "MADE Tommy Soft Regular PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft Regular PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft Regular PERSONAL USE.woff")
+      format("woff");
+}
+@font-face {
+  font-family: "MADE Tommy Soft Medium PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft Medium PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft Medium PERSONAL USE.woff")
+      format("woff");
+}
+@font-face {
+  font-family: "MADE Tommy Soft Light PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft Light PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft Light PERSONAL USE.woff")
+      format("woff");
+}
+@font-face {
+  font-family: "MADE Tommy Soft ExtraBold PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft ExtraBold PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft ExtraBold PERSONAL USE.woff")
+      format("woff");
+}
+@font-face {
+  font-family: "MADE Tommy Soft Bold PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft Bold PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft Bold PERSONAL USE.woff")
+      format("woff");
+}
+@font-face {
+  font-family: "MADE Tommy Soft Black PERSONAL USE";
+  font-style: normal;
+  font-weight: normal;
+  src:
+    local("MADE Tommy Soft Black PERSONAL USE"),
+    url("/fonts/made-tommy-soft/MADE Tommy Soft Black PERSONAL USE.woff")
+      format("woff");
+}
+/* MADE Tommy Soft end */
+
+/* Bumper Sticker DEMO start */
+@font-face {
+  font-family: "Bumper Sticker DEMO";
+  src: url("https://db.onlinewebfonts.com/t/e7ff36502536244b640183cd561691ef.eot");
+  src:
+    url("https://db.onlinewebfonts.com/t/e7ff36502536244b640183cd561691ef.eot?#iefix")
+      format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/e7ff36502536244b640183cd561691ef.woff2")
+      format("woff2"),
+    url("https://db.onlinewebfonts.com/t/e7ff36502536244b640183cd561691ef.woff")
+      format("woff"),
+    url("https://db.onlinewebfonts.com/t/e7ff36502536244b640183cd561691ef.ttf")
+      format("truetype"),
+    url("https://db.onlinewebfonts.com/t/e7ff36502536244b640183cd561691ef.svg#Bumper Sticker DEMO")
+      format("svg");
+}
+/* Bumper Sticker DEMO end */
