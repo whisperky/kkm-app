@@ -139,7 +139,7 @@ export default function StoreItem({
         return (
           <ClaimDialog type="store">
             <div className="flex w-full items-center justify-center drop-shadow-[0_1px_0px_#00000029]">
-              <Image src={claimIcon} alt="Claim" width={16} height={16} />
+              <Image src={claimIcon} alt="Claim" width={13} height={13} />
               Claim
             </div>
           </ClaimDialog>

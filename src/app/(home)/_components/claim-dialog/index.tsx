@@ -11,7 +11,11 @@ import {
 } from "@/src/_components/ui/dialog";
 import StoreItem from "@/src/app/(home)/_components/store-dialog/item-card";
 
-import { collectorPassData, catchUpBundlesData } from "@/src/app/(home)/data";
+import {
+  collectorPassData,
+  catchUpBundlesData,
+  CollectorItem,
+} from "@/src/app/(home)/data";
 
 import close from "@/_assets/icons/close-button.png";
 import starBgIcon from "@/_assets/star-bg.png";
@@ -26,6 +30,11 @@ export default function ClaimDialog({
 }) {
   const [purchasedId, setPurchasedId] = useState(4);
   const [claimedId, setClaimedId] = useState(1);
+  const [collectorData, setCollectorData] = useState<CollectorItem[]>([]);
+
+  useEffect(() => {
+    setCollectorData(collectorPassData);
+  }, [collectorPassData]);
 
   useEffect(() => {
     if (type === "store") {
@@ -39,7 +48,7 @@ export default function ClaimDialog({
       setPurchasedId(_purchasedId ?? 4);
       setClaimedId(_claimedId ?? 1);
     }
-  }, []);
+  }, [collectorData]);
 
   return (
     <Dialog>
@@ -57,7 +66,7 @@ export default function ClaimDialog({
           <BoxContent className="mt-0 p-0 mx-1 pb-3 overflow-auto mb-2 grid align-center rounded-3xl border border-solid border-white/40 bg-[#EED1B8]">
             {type === "store" ? (
               <div className="grid grid-cols-3 gap-3 p-3">
-                {collectorPassData.map((item) => {
+                {collectorData.map((item) => {
                   return (
                     <StoreItem
                       key={item.id}
@@ -71,6 +80,13 @@ export default function ClaimDialog({
                       unlockable={item.id > claimedId + 1}
                       icon={item.icon}
                       star
+                      onClick={() => {
+                        setCollectorData((prev) => {
+                          const newData = [...prev];
+                          newData[item.id - 1].claimed = true;
+                          return newData;
+                        });
+                      }}
                     />
                   );
                 })}
