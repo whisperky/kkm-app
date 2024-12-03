@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+"use client";
+
+import React, { useCallback, useState } from "react";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { BoxContent, BoxMain } from "@/src/_components/shared/board-structure";
@@ -7,48 +9,75 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/src/_components/ui/dialog";
 import StoreItem from "@/src/app/(home)/_components/store-dialog/item-card";
 
-import {
-  collectorPassData,
-  catchUpBundlesData,
-  CollectorItem,
-} from "@/src/app/(home)/data";
+import { collectorPassData } from "@/src/app/(home)/data";
 
 import close from "@/_assets/icons/close-button.png";
 import starBgIcon from "@/_assets/star-bg.png";
 import bottomBoard from "@/_assets/bottom-board.png";
+import { Input } from "@/src/_components/ui/input";
+import { useCheckWallet } from "@/services/nft";
+import toast from "react-hot-toast";
+import { IconSpinner } from "@/src/_components/icons";
+import moment from "moment";
 
 export default function ClaimDialog({
   children,
   type,
+  data,
+  onClick,
 }: {
   children?: React.ReactNode;
-  type: "store" | number;
+  type: "store" | string;
+  onClick?: (_: any, _data?: Record<string, any>) => void;
+  data: {
+    title: string;
+    price: string | number;
+    icon: any;
+    rewards?: {
+      kokos?: number;
+      spins?: number;
+      collectibles?: number;
+    };
+    current_day?: number;
+    last_update?: Date;
+    itemId?: string;
+    star?: boolean;
+  };
 }) {
-  const [purchasedId, setPurchasedId] = useState(4);
-  const [claimedId, setClaimedId] = useState(1);
-  const [collectorData, setCollectorData] = useState<CollectorItem[]>([]);
+  const [walletValue, setWalletValue] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { mutateAsync: walletExists } = useCheckWallet();
 
-  useEffect(() => {
-    setCollectorData(collectorPassData);
-  }, [collectorPassData]);
+  const handleBuy = useCallback(
+    async (e: any) => {
+      setLoading(true);
+      try {
+        if (data?.rewards?.collectibles) {
+          if (!walletValue) return toast.error("Please Enter Wallet Address");
 
-  useEffect(() => {
-    if (type === "store") {
-      const _purchasedId = collectorPassData.find(
-        (item) => item.purchased === true
-      )?.id;
-      const _claimedId = collectorPassData.find(
-        (item) => item.claimed === true
-      )?.id;
+          const { data: exists } = await walletExists({ wallet: walletValue });
+          if (!exists) return toast.error("Wallet does not exist");
+        }
 
-      setPurchasedId(_purchasedId ?? 4);
-      setClaimedId(_claimedId ?? 1);
-    }
-  }, [collectorData]);
+        onClick?.(e, { wallet: walletValue });
+      } catch (error) {
+        toast.error(
+          <p className="text-center">
+            Error Checking Wallet
+            <br />
+            Come Back Later
+          </p>
+        );
+      }
+      setLoading(false);
+    },
+    [data?.rewards?.collectibles, onClick, walletExists, walletValue]
+  );
 
   return (
     <Dialog>
@@ -57,36 +86,47 @@ export default function ClaimDialog({
         containerClassName="flex flex-col !overflow-hidden !max-h-[75dvh]"
         isClaimBoard
       >
+        <DialogTitle className="sr-only">
+          {type === "store" ? "Claim a new collectible everyday!" : data?.title}
+        </DialogTitle>
         <BoxMain hideClose className="rounded-t-3xl">
           <div className="z-20 px-2 text-center font-bumper-sticker text-3xl text-[#491F36] stroke-[linear-gradient(to right, #B4704A, #F4A860)]">
             {type === "store"
               ? "Claim a new collectible everyday!"
-              : catchUpBundlesData[type - 1].title}
+              : data?.title}
           </div>
           <BoxContent className="mt-0 p-0 mx-1 pb-3 overflow-auto mb-2 grid align-center rounded-3xl border border-solid border-white/40 bg-[#EED1B8]">
             {type === "store" ? (
               <div className="grid grid-cols-3 gap-3 p-3">
-                {collectorData.map((item) => {
+                {collectorPassData.map((item, index) => {
                   return (
                     <StoreItem
-                      key={item.id}
-                      id={item.id}
-                      title={`${item.id} ${item.title}`}
+                      key={index}
+                      id={index}
+                      title={`${item.title} #${index + 1}`}
                       type="claim"
-                      price={item.price}
-                      purchased={item.purchased}
-                      claimed={item.claimed}
-                      lock={item.id > purchasedId}
-                      unlockable={item.id > claimedId + 1}
+                      price={0}
+                      purchased={true}
+                      claimed={
+                        (data?.current_day ??
+                          data?.rewards?.collectibles ??
+                          6) > index
+                      }
+                      lock={(data?.rewards?.collectibles ?? 4) <= index}
+                      unlockable={
+                        (data?.current_day ??
+                          data?.rewards?.collectibles ??
+                          6) <= index &&
+                        (data?.current_day == index
+                          ? moment().diff(moment(data?.last_update), "days") < 1
+                          : true)
+                      }
+                      itemId={data?.itemId}
                       icon={item.icon}
+                      current_day={data?.current_day ?? 6}
+                      last_update={data?.last_update}
+                      onClick={onClick}
                       star
-                      onClick={() => {
-                        setCollectorData((prev) => {
-                          const newData = [...prev];
-                          newData[item.id - 1].claimed = true;
-                          return newData;
-                        });
-                      }}
                     />
                   );
                 })}
@@ -95,39 +135,54 @@ export default function ClaimDialog({
               <>
                 <div className="relative flex flex-col items-center justify-center m-2 rounded-2xl bg-light-orange">
                   <Image
-                    src={catchUpBundlesData[type - 1].icon}
-                    alt={catchUpBundlesData[type - 1].title}
+                    src={data?.icon}
+                    alt={data?.title}
                     width={120}
                     height={120}
                     className="py-6 z-[1]"
                   />
-
-                  <Image
-                    src={starBgIcon}
-                    alt="Star background"
-                    width={188}
-                    height={188}
-                    className="absolute bottom-[calc(50%-94px)] left-[calc(50%-94px)] z-0"
-                  />
+                  {data?.star && (
+                    <Image
+                      src={starBgIcon}
+                      alt="Star background"
+                      width={188}
+                      height={188}
+                      className="absolute bottom-[calc(50%-94px)] left-[calc(50%-94px)] z-0"
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col items-center justify-center text-base font-bold text-[#745061] font-made-tommy">
-                  <p>
-                    {catchUpBundlesData[type - 1].collectibles} Kokomo
-                    Collectibles
-                  </p>
-                  <p>{catchUpBundlesData[type - 1].kokos} Kokos</p>
-                  <p>{catchUpBundlesData[type - 1].spins} Spins</p>
+                  {data?.rewards
+                    ? Object.entries(data?.rewards).map(([key, value]) => (
+                        <p key={key}>
+                          {value} {key.charAt(0).toUpperCase() + key.slice(1)}
+                        </p>
+                      ))
+                    : data?.title}
                 </div>
                 <div className="flex flex-col gap-2 items-center justify-center m-2 p-2 rounded-2xl bg-light-tan">
+                  {data?.rewards?.collectibles && (
+                    <Input
+                      id="wallet"
+                      value={walletValue}
+                      onChange={(e) => setWalletValue(e.target.value)}
+                      placeholder="Enter your wallet address"
+                      className="bg-[#E5E1D3] text-base h-8 rounded-xl border-2 border-[#A07546] !outline-none ring-2 ring-[#634127] focus-visible:ring-[#634127] focus-visible:ring-offset-0 !text-[#7B7B7B]"
+                      required
+                    />
+                  )}
                   <Button
+                    onClick={handleBuy}
+                    disabled={loading}
                     className={cn(
-                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99] hover:bg-neutral-500 active:bg-neutral-600"
+                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99] hover:bg-green active:bg-neutral-600",
+                      "flex gap-2 items-center"
                     )}
                   >
-                    Buy
+                    Buy {loading && <IconSpinner />}
                   </Button>
                   <div className="text-base font-bold text-[#745061] text-center">
-                    ${catchUpBundlesData[type - 1].price}
+                    ${data?.price}
                   </div>
                 </div>
               </>

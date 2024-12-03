@@ -18,13 +18,19 @@ export function useSendMessage() {
     mutationFn: ({
       sessionId,
       message,
+      buttonText,
+      buttonUrl,
     }: {
       sessionId: TSessionId;
       message: string;
+      buttonText?: string;
+      buttonUrl?: string;
     }) =>
       baseInstance
         .post(`/report-service/bot/test-send-message`, {
           userId: sessionId,
+          buttonText,
+          buttonUrl,
           message,
         })
         .then((res) => res.data),

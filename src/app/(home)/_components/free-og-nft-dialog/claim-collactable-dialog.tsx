@@ -9,27 +9,36 @@ import {
 import FireIcon from "@/_assets/icons/fire-icon.png";
 import SpinnerIcon from "../../../1v1/_assets/icons/spinner.svg";
 import { Input } from "@/src/_components/ui/input";
-import React, { useCallback, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import Image from "next/image";
 import { Button } from "@/src/_components/ui/button";
 import { CheckIcon, X } from "lucide-react";
-import { useAirdropCheck, useAirdropNft } from "@/services/nft";
+import { useClaimCollectable } from "@/services/nft";
 import { GeneralContext } from "@/src/app/general-context";
 import useScreenWidthRatio from "@/src/_hooks/use-screen-width-ratio";
-import useActions from "@/src/_hooks/useAction";
+import { useEditUserItem } from "@/services/store";
 
-const ClaimNFTDialog = ({
+const ClaimCollactableDialog = ({
+  id = "",
+  current_day = 0,
   children,
-  type,
+  onSubmitEnd,
 }: {
+  id?: string;
+  current_day: number;
+  onSubmitEnd?: (_e: any) => void;
   children?: (_: {
     openModal: boolean;
     setOpenModal: Setter<boolean>;
     claimable: boolean;
     setClaimable: Setter<boolean>;
-    type: string;
   }) => React.ReactNode;
-  type: string;
 }) => {
   const { sessionId } = useContext(GeneralContext);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,9 +47,8 @@ const ClaimNFTDialog = ({
   const widthRatio = useScreenWidthRatio(390);
   const [connecting, setConnecting] = useState(false);
   const [walletValue, setWalletValue] = useState("");
-  const { mutateAsync: claimAirDrop } = useAirdropNft();
-  const { saveAction } = useActions();
-  const { mutateAsync: checkAirDrop } = useAirdropCheck();
+  const { mutateAsync: claimCollectable } = useClaimCollectable();
+  const { mutateAsync: editItem } = useEditUserItem();
   const [walletStatus, setWalletStatus] = useState({
     show: false,
     error: false,
@@ -49,44 +57,53 @@ const ClaimNFTDialog = ({
     btnLabel: "",
   });
 
-  const handleWalletValue = useCallback(async () => {
-    try {
-      setConnecting(true);
+  const handleWalletValue = useCallback(
+    async (e: any) => {
+      try {
+        if (!id) throw new Error("Id not found");
+        setConnecting(true);
 
-      saveAction(
-        type === "welcome"
-          ? "welcomeNFT_wallet_entered"
-          : "freeOGNFT_wallet_entered"
-      );
-
-      await claimAirDrop({ wallet: walletValue, sessionId, type });
-      setClaimable?.(false);
-      saveAction(
-        type === "welcome"
-          ? "welcomeNFT_successful_claim"
-          : "freeOGNFT_successful_claim"
-      );
-      setWalletStatus({
-        show: true,
-        error: false,
-        title: "Claim Successful",
-        subTitle: "Check your wallet",
-        btnLabel: "Great!",
-      });
-    } catch (error: any) {
-      console.log(error);
-
-      setWalletStatus({
-        show: true,
-        error: true,
-        title: "Sorry, something went wrong",
-        subTitle: error?.response?.data?.message || error?.message || "",
-        btnLabel: "Ok!",
-      });
-    } finally {
-      setConnecting(false);
-    }
-  }, [claimAirDrop, saveAction, sessionId, type, walletValue]);
+        await claimCollectable({ wallet: walletValue, sessionId });
+        await editItem({
+          id,
+          body: {
+            purchase_details: {
+              current_day: current_day + 1,
+              last_update: new Date(),
+            },
+          },
+        });
+        setClaimable?.(false);
+        setWalletStatus({
+          show: true,
+          error: false,
+          title: "Claim Successful",
+          subTitle: "Check your wallet",
+          btnLabel: "Great!",
+        });
+      } catch (error: any) {
+        setWalletStatus({
+          show: true,
+          error: true,
+          title: "Sorry, something went wrong",
+          subTitle: error?.response?.data?.message || error?.message || "",
+          btnLabel: "Ok!",
+        });
+      } finally {
+        setConnecting(false);
+        onSubmitEnd?.(e);
+      }
+    },
+    [
+      claimCollectable,
+      current_day,
+      editItem,
+      id,
+      onSubmitEnd,
+      sessionId,
+      walletValue,
+    ]
+  );
 
   const hideWalletStatus = () => {
     setWalletStatus({
@@ -99,31 +116,6 @@ const ClaimNFTDialog = ({
   };
 
   useEffect(() => {
-    const checkClaim = async () => {
-      try {
-        const { data } = await checkAirDrop({ sessionId, type });
-        setClaimable?.(!data?.isClaimed);
-      } catch (error) {
-        setClaimable?.(false);
-      }
-    };
-
-    checkClaim();
-  }, [checkAirDrop, sessionId, type]);
-
-  const pressedLater = useCallback((e: any) => {
-    e.preventDefault();
-    saveAction(
-      type === "welcome"
-        ? "welcomeNFT_later_click"
-        : "freeOGNFT_later_click"
-    );
-    localStorage.setItem("user.viewed.air.drop", "true");
-    localStorage.setItem("nft-flow", "false");
-    setOpenModal(false);
-  }, [saveAction, type]);
-
-  useEffect(() => {
     const timer = setTimeout(() => {
       if (openModal && inputRef.current) {
         inputRef.current?.blur();
@@ -131,6 +123,7 @@ const ClaimNFTDialog = ({
     }, 10);
     return () => clearTimeout(timer);
   }, [openModal]);
+
   const handleFocus = () => {
     if (inputRef.current) {
       inputRef.current.focus();
@@ -144,7 +137,7 @@ const ClaimNFTDialog = ({
 
   return (
     <>
-      {children?.({ openModal, setOpenModal, claimable, setClaimable, type })}
+      {children?.({ openModal, setOpenModal, claimable, setClaimable })}
       <Dialog open={openModal} onOpenChange={(open) => setOpenModal(open)}>
         {connecting ? (
           <SpinnerComponent />
@@ -190,12 +183,9 @@ const ClaimNFTDialog = ({
                 className="flex-col w-full space-y-2 items-center"
                 onSubmit={(e) => {
                   e?.preventDefault();
-                  handleWalletValue();
+                  handleWalletValue(e);
                 }}
               >
-                <div className="text-center text-nowrap font-extrabold text-[20px] text-[#5F3F57]">
-                  Airdrop Coming Your Way!
-                </div>
                 <div className="bg-[#E3BEAA] flex-1 overflow-none p-3 rounded-2xl space-y-3">
                   <div className="relative">
                     <Image
@@ -240,8 +230,7 @@ const ClaimNFTDialog = ({
                           fontSize: "8px",
                           textAlign: "center",
                         }}
-                      >
-                      </span>
+                      ></span>
                     </label>
                   </div>
                   <Button
@@ -251,15 +240,6 @@ const ClaimNFTDialog = ({
                     Claim Free NFT!
                   </Button>
                 </div>
-                <Button
-                  type="button"
-                  onClick={(e) => {
-                    pressedLater(e);
-                  }}
-                  className="block w-2/3 mx-auto bg-[linear-gradient(0deg,_rgba(227,_190,_170,_0),_rgba(227,_190,_170,_0)),linear-gradient(0deg,_rgba(116,_80,_97,_0.1),_rgba(116,_80,_97,_0.1))] font-extrabold text-md leading-none text-[#745061] h-8 rounded-xl border-2 border-[#745061B2]"
-                >
-                  Later
-                </Button>
               </form>
             )}
           </DialogContent>
@@ -293,4 +273,4 @@ const SpinnerComponent = () => {
   );
 };
 
-export default ClaimNFTDialog;
+export default ClaimCollactableDialog;

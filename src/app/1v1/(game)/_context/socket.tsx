@@ -131,15 +131,14 @@ export function SocketContextProvider({
 
   useEffect(() => {
     socket?.on("match-ended", async (data) => {
-      console.log("match-end from Socket.IO:", data);
+      // console.log("match-end from Socket.IO:", data);
+      const scores = [...(data?.scores || [])];      
+      const playerOne = [scores?.[0]?.sessionId, scores?.[0]?.score, scores?.[0]?.username];
+      const playerTwo =  [scores?.[1]?.sessionId, scores?.[1]?.score, scores?.[1]?.username];
 
-      const scores = Object.entries(data?.scores);
-      const playerOne = [scores?.[0]?.[0], ...(scores?.[0]?.[1] as any[])];
-      const playerTwo = [scores?.[1]?.[0], ...(scores?.[1]?.[1] as any[])];
-
-      console.log("scores:", scores);
-      console.log("score one:", playerOne);
-      console.log("score two:", playerTwo);
+      // console.log("scores:", scores);
+      // console.log("score one:", playerOne);
+      // console.log("score two:", playerTwo);
 
       setFinalScoreData({
         playerOne: {

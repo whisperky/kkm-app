@@ -22,15 +22,10 @@ export interface ILeaderboard {
   };
 }
 
-function getNextPageParam(
-  lastPage: ILeaderboard,
-  allPages: ILeaderboard[] = []
-) {
-  const loadedCount = allPages?.flatMap?.((page) => page?.data)?.length;
-
-  if (loadedCount >= 100 || loadedCount >= lastPage?.pagination?.total)
-    return undefined;
-  return (allPages?.length || 0) + 1;
+function getNextPageParam(lastPage: ILeaderboard, allPages: ILeaderboard[]) {
+  const loadedCount = allPages.flatMap((page) => page.data).length;
+  if (loadedCount >= lastPage.pagination.total) return undefined;
+  return allPages.length + 1;
 }
 
 export function useTopScores(sessionId: TSessionId) {
@@ -48,6 +43,23 @@ export function useTopScores(sessionId: TSessionId) {
         .then((res) => res.data),
     initialPageParam: 1,
     getNextPageParam,
+    select: (data) => {
+      // Adjust the current rank and merge/sort data
+      const allData = data.pages.flatMap((page) => page.data);
+      const sortedData = allData.sort((a, b) => a.rank - b.rank); // Sort by rank
+
+      // Adjust current rank by adding +1
+      const updatedCurrent = {
+        ...data.pages[0].current,
+        rank: data.pages[0].current.rank + 1,
+      };
+
+      // Return modified data structure with updated `current` and `pages`
+      return {
+        ...data,
+        pages: [{ ...data.pages[0], current: updatedCurrent, data: sortedData }],
+      };
+    },
   });
 }
 
@@ -61,7 +73,7 @@ export function useTopSabotage(sessionId: TSessionId) {
           {
             params: {
               page: pageParam,
-              start: ((Number(pageParam) || 1) - 1) * 20,
+              start: ((Number(pageParam) || 1)) * 20,
               size: 20,
             },
           }

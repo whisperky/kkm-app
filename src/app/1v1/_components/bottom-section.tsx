@@ -60,8 +60,8 @@ export default function BottomSection({ scale }: Props) {
         <div className="w-full absolute flex flex-col justify-between items-center h-full z-20 pt-[20px] pb-[28px] mx-auto">
           <div className="flex justify-between w-full max-w-[90%]">
             <TelegramShareButton
+              title={"💥 1v1 me in 1M1!? 💥 \n\nClick the link to join and we both earn 1000 Kokos just for playing. Winner takes the full 3000 Koko prize! 🥥"}
               url={url}
-              title="Challenge me to a 1v1 match in One Million and One Kokos!"
               className="w-full max-w-[84%] -translate-y-0.5"
               onClick={() => {
                 saveAction("miniMatch_inviteTG_click");

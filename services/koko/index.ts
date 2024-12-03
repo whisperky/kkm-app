@@ -101,7 +101,7 @@ export interface IDayType {
   startProtectionTime: string | null;
   protectionDurationInMinutes: number;
   remainingProtectionTime: number;
-  currentDay: number;
+  current_day: number;
   protectionUsedToday: boolean;
   created_at: Date;
   updated_at: Date;
@@ -168,7 +168,7 @@ export function useClaimProtection() {
       baseInstance
         .post<{
           message: string;
-          currentDay: number;
+          current_day: number;
           remainingTime: number;
         }>(`/points-service/koko/${sessionId}/activate`)
         .then((res) => res.data),
@@ -182,7 +182,7 @@ export function useActivateTimer() {
       baseInstance
         .post<{
           message: string;
-          currentDay: number;
+          current_day: number;
           remainingTime: number;
         }>(`/points-service/koko/activateTimer/${sessionId}`)
         .then((res) => res.data),

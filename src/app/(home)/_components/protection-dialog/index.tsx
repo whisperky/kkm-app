@@ -137,11 +137,11 @@ export default function ProtectionBoard() {
                       task={{
                         ...task,
                         received:
-                          (data?.data?.prev?.[0]?.currentDay || 0) >=
+                          (data?.data?.prev?.[0]?.current_day || 0) >=
                             task.day ||
-                          data?.data?.current?.[0]?.currentDay === task.day,
+                          data?.data?.current?.[0]?.current_day === task.day,
                         collectable:
-                          (data?.data?.prev?.[0]?.currentDay || 0) + 1 ===
+                          (data?.data?.prev?.[0]?.current_day || 0) + 1 ===
                           task.day,
                       }}
                       refresh={refetch}

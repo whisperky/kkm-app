@@ -13,6 +13,7 @@ import useTelegramWebApp from "@/src/_hooks/use-telegram";
 import { QueryObserverResult, RefetchOptions } from "@tanstack/react-query";
 import {
   IGetUser,
+  IInitialPoints,
   useGetUser,
   useInitialPoints,
   useUpdateUser,
@@ -20,7 +21,8 @@ import {
 import { useUsdt } from "@/services/usdt";
 import { usePathname, useRouter } from "next/navigation";
 import { IBonusCompletion, useBonusCompletion } from "@/services/bonus";
-import { useCheckBetaTester } from "@/services/beta-testers";
+// import { useCheckBetaTester } from "@/services/beta-testers";
+import { saveActivity } from "../_hooks/useAction";
 
 export interface IGeneralContext {
   webApp?: TelegramWebApp | null;
@@ -31,6 +33,9 @@ export interface IGeneralContext {
   gameId?: TGameId;
   myScore?: number;
   addMyScore?: (_score: number) => void;
+  refreshMyScore?: (
+    _options?: RefetchOptions
+  ) => Promise<QueryObserverResult<IInitialPoints, Error>>;
   isLoadingMyScore?: boolean;
   myUsdt?: number;
   addMyUsdt?: (_score: number) => void;
@@ -58,11 +63,12 @@ export function GeneralContextProvider({
   const router = useRouter();
   const pathName = usePathname();
   const sessionId = useMemo(
-    () => (webApp?.initDataUnsafe?.user?.id as TSessionId) || 20002?.toString(),
+    () => (webApp?.initDataUnsafe?.user?.id as TSessionId),
     [webApp?.initDataUnsafe?.user?.id]
   );
   const username = useMemo(
-    () => (webApp?.initDataUnsafe?.user?.username as TSessionId) || "benndalton2",
+    () =>
+      (webApp?.initDataUnsafe?.user?.username as TSessionId),
     [webApp?.initDataUnsafe?.user?.username]
   );
   const photo_url = useMemo(
@@ -79,11 +85,14 @@ export function GeneralContextProvider({
   >();
 
   // Queries
-  const { mutateAsync: checkBetaTester } = useCheckBetaTester();
+  // const { mutateAsync: checkBetaTester } = useCheckBetaTester();
   const { data: userData, refetch: getUserData } = useGetUser(sessionId);
   const { mutateAsync: updateUserFn } = useUpdateUser();
-  const { data: initialPoints, isLoading: isLoadingMyScore } =
-    useInitialPoints(sessionId);
+  const {
+    data: initialPoints,
+    isLoading: isLoadingMyScore,
+    refetch: refreshMyScore,
+  } = useInitialPoints(sessionId);
   const { data: initialUsdt, isLoading: isLoadingMyUsdt } = useUsdt({
     sessionId,
   });
@@ -132,8 +141,31 @@ export function GeneralContextProvider({
   }, [router, pathName]);
 
   useEffect(() => {
-    addMyScore(Number(initialPoints?.total) || 0);
-  }, [addMyScore, initialPoints?.total]);
+    let touchStartEvent: TouchEvent | null = null;
+
+    const preventZoom = (e: TouchEvent | MouseEvent) => {
+      e.preventDefault();
+    };
+
+    const handleTouch = (e: TouchEvent) => {
+      if (touchStartEvent && e.touches.length > 1) preventZoom(e);
+      touchStartEvent = e;
+    };
+
+    document.addEventListener("touchstart", handleTouch);
+    document.addEventListener("dblclick", preventZoom);
+    document.addEventListener("touchmove", handleTouch);
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouch);
+      document.removeEventListener("dblclick", preventZoom);
+      document.removeEventListener("touchmove", handleTouch);
+    };
+  }, []);
+
+  useEffect(() => {
+    setMyScore(Number(initialPoints?.total) || 0);
+  }, [initialPoints?.total]);
 
   useEffect(() => {
     addMyUsdt(Number(initialUsdt?.data?.total) || 0);
@@ -159,29 +191,36 @@ export function GeneralContextProvider({
     }
   }, [completionStatusData?.data]);
 
+  // useEffect(() => {
+  //   let timeoutId: NodeJS.Timeout;
+  //   const check = async () => {
+  //     const pathName = window.location.pathname;
+  //     if (pathName !== "/not-tester" && pathName !== "/not-mobile") {
+  //       if (!username) {
+  //         timeoutId = setTimeout(() => {
+  //           window.location.assign("/not-tester");
+  //         }, 5000);
+  //       } else {
+  //         clearTimeout(timeoutId);
+  //         const tempTesters = await checkBetaTester(`${username}`);
+  //         if (tempTesters && !tempTesters?.exists) {
+  //           window.location.assign("/not-tester");
+  //         }
+  //       }
+  //     }
+  //   };
+  //   check();
+  //   return () => {
+  //     clearTimeout(timeoutId);
+  //   };
+  // }, [checkBetaTester, username]);
+
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    const check = async () => {
-      const pathName = window.location.pathname
-      if (pathName !== "/not-tester" && pathName !== "/not-mobile") {
-        if (!username) {
-          timeoutId = setTimeout(() => {
-            window.location.assign("/not-tester");
-          }, 5000);
-        } else {
-          clearTimeout(timeoutId);
-          const tempTesters = await checkBetaTester(`${username}`);
-          if (tempTesters && !tempTesters?.exists) {
-            window.location.assign("/not-tester");
-          }
-        }
-      }
-    };
+    const check = async () =>
+      await saveActivity(sessionId, "player_start_session");
+
     check();
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [checkBetaTester, username]);
+  }, [sessionId]);
 
   const contextValue = useMemo(
     () => ({
@@ -195,6 +234,7 @@ export function GeneralContextProvider({
       gameId,
       myScore,
       addMyScore,
+      refreshMyScore,
       isLoadingMyScore,
       completionStatus,
       myUsdt,
@@ -214,6 +254,7 @@ export function GeneralContextProvider({
       gameId,
       myScore,
       addMyScore,
+      refreshMyScore,
       isLoadingMyScore,
       completionStatus,
       myUsdt,

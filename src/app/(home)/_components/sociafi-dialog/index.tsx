@@ -174,7 +174,10 @@ export default function SocialFiDialog() {
                   </p>
                 </div>
                 <div className="flex [&>*]:!flex-1 [&>*]:!py-0.5 flex-wrap pt-3 gap-3 border-0 border-t border-solid border-white/60">
-                  <ShareButtons />
+                  <ShareButtons
+                    shareName="socialFi_inviteTG_click"
+                    copyName="socialFi_copyLink_click"
+                  />
                 </div>
               </div>
             </div>

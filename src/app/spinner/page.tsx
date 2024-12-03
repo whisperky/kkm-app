@@ -22,6 +22,7 @@ import {
 } from "@/src/_components/ui/dialog";
 import { Button } from "@/src/_components/ui/button";
 import PageTitleBanner from "@/src/_components/shared/page-title-banner";
+import useActions from "@/src/_hooks/useAction";
 
 type TReward = "kokos" | "USDT" | "spin";
 
@@ -53,6 +54,7 @@ export default function KokoSpinner() {
   const [loading, setLoading] = useState(false);
   const [isGrayingOut, setIsGrayingout] = useState(false);
   const spinsList = useMemo(() => shuffleArray(spinnerProbability), []);
+  const { saveAction } = useActions();
 
   const [randomTarget, setRandomTarget] = useState<TRandom>();
   const [openReward, setOpenReward] = useState(false);
@@ -102,9 +104,7 @@ export default function KokoSpinner() {
   );
 
   const handleBonus = useCallback(async () => {
-    setTimeout(() => {
-      setLoading(true);
-    }, 500);
+    setLoading(true);
     setTimeout(() => setIsGrayingout(true), 1000);
     const reward = randomTarget?.type as TReward;
 
@@ -126,10 +126,10 @@ export default function KokoSpinner() {
       await postSpin?.({});
     } catch (error) {
       // error
+    } finally {
+      setLoading(false);
+      setIsGrayingout(false);
     }
-
-    setLoading(false);
-    setIsGrayingout(false);
   }, [
     addScore,
     addSpin,
@@ -246,7 +246,10 @@ export default function KokoSpinner() {
             <>
               <ConnectButton
                 className="w-full justify-center"
-                onClick={handelClick}
+                onClick={() => {
+                  handelClick();
+                  saveAction('spinner_Spin_click')
+                }}
                 disabled={
                   loading || isSpinning || (spins?.data?.total || 0) <= 0
                 }
@@ -263,6 +266,9 @@ export default function KokoSpinner() {
           size="md"
           className="text-golden-brown text-center"
           containerClassName="h-full flex flex-col gap-2 p-2 pt-0"
+          onClick={() => {
+            saveAction('spinner_help_click');
+          }}
         >
           <DialogTitle className="font-bold text-xl">
             Prize Withdrawals

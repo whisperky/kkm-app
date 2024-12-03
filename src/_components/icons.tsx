@@ -1,6 +1,4 @@
 import Image from "next/image";
-import ButtonStoneImage from "@/_assets/button-stone.png";
-import { PropsWithChildren } from "react";
 
 import NFTDarkImage from "@/_assets/icons/nft-dark-unfocused.png";
 import StatsDarkImage from "@/_assets/icons/stats-dark-unfocused.png";
@@ -10,7 +8,8 @@ import SocialFiDarkImage from "@/_assets/icons/socialfi-dark-unfocused.png";
 
 import NFTDarkFocusedImage from "@/_assets/icons/nft-dark-focused.png";
 import StatsDarkFocusedImage from "@/_assets/icons/stats-dark-focused.png";
-import PlayDarkFocusedImage from "@/_assets/icons/play-dark-unfocused.png"; // NOT
+// import PlayDarkFocusedImage from "@/_assets/icons/play-dark-unfocused.png"; // NOT
+import PlayDarkFocusedImage from "@/_assets/icons/play-dark-focused.png";
 import CalendarDarkFocusedImage from "@/_assets/icons/calendar-dark-focused.png";
 import SocialFiDarkFocusedImage from "@/_assets/icons/socialfi-dark-focused.png";
 import { cn } from "@/lib/utils";
@@ -200,6 +199,7 @@ export const NFTDarkIcon = ({
       src={focused ? NFTDarkFocusedImage : NFTDarkImage}
       width={70}
       height={78}
+      unoptimized
     />
   );
 };
@@ -214,6 +214,7 @@ export const StatsDarkIcon = ({
       src={focused ? StatsDarkFocusedImage : StatsDarkImage}
       width={70}
       height={78}
+      unoptimized
     />
   );
 };
@@ -228,6 +229,7 @@ export const PlayDarkIcon = ({
       src={focused ? PlayDarkFocusedImage : PlayDarkImage}
       width={70}
       height={78}
+      unoptimized
     />
   );
 };
@@ -242,6 +244,7 @@ export const CalendarDarkIcon = ({
       src={focused ? CalendarDarkFocusedImage : CalendarDarkImage}
       width={70}
       height={78}
+      unoptimized
     />
   );
 };
@@ -256,28 +259,8 @@ export const SocialFiDarkIcon = ({
       src={focused ? SocialFiDarkFocusedImage : SocialFiDarkImage}
       width={70}
       height={78}
+      unoptimized
     />
-  );
-};
-
-export const ButtonStone = ({
-  children,
-  ...props
-}: React.ComponentProps<"button"> & PropsWithChildren) => {
-  return (
-    <button
-      {...props}
-      className="relative h-[78px] flex items-center justify-center"
-    >
-      <Image
-        className="absolute h-full"
-        alt="Button Stone"
-        src={ButtonStoneImage}
-        width={70}
-        height={78}
-      />
-      <div className="z-10 [">{children}</div>
-    </button>
   );
 };
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import Background from "@/_assets/background.png";
 import SpinnerIcon from "../../_assets/icons/spinner.svg";
 import SingleButtonSlot from "@/_assets/single-button-slot.png";
@@ -18,8 +18,6 @@ import { decodeInviteKey } from "@/utils/keys";
 import { useSendMessage } from "@/services/game/match";
 import useActions from "@/src/_hooks/useAction";
 
-// const randomId = Math.floor(Math.random() * 10000);
-
 export default function Page({
   searchParams,
 }: {
@@ -32,6 +30,7 @@ export default function Page({
   const { socket, socketStatus } = useContext(SocketContext);
   const { sessionId, username } = useContext(GeneralContext);
   const { players, setPlayers } = useContext(MatchContext);
+  // const [notificationSent, setNotificationSent] = useState(false);
   const { saveAction } = useActions();
   const inviteKey = useMemo(
     () => searchParams?.inviteKey,
@@ -82,24 +81,35 @@ export default function Page({
     setStatus("waiting");
   }, [inviteKey, sessionId, socket, status, username]);
 
+  const notifiedInvitersRef = useRef(new Set());
   useEffect(() => {
-    if (!inviteKey) return;
+    if (socketStatus !== "connected" || !inviteKey) return;
 
     const { sessionId: inviter } = decodeInviteKey(inviteKey);
-    if (!inviter || inviter == sessionId) return;
+    if (!inviter || inviter === sessionId) return;
 
-    const send = async () => {
-      const message = `🎉 *Exciting news!*\nYour friend ${
-        username ? `*${username}* ` : ""
-      }has accepted your invite and just joined the game. The competition is on!\nGet ready to face off in an *epic 1v1 match* — may the best player win!`;
+    if (notifiedInvitersRef.current.has(inviter)) {
+      console.log(`[DEBUG] Notification already sent for inviter: ${inviter}`);
+      return;
+    }
 
-      sendMessage?.({
+    const notifyInviter = async () => {
+      console.log(`[DEBUG] Sending notification to inviter: ${inviter}`);
+      const link = `${location?.origin}/1v1/waiting?inviteKey=${inviteKey}`;
+      const message = `💥 **Your 1v1 challenge has been accepted!**`;
+
+      await sendMessage?.({
         message,
         sessionId: `${inviter}`,
+        buttonText: "🎮 Join the Match",
+        buttonUrl: link,
       });
+
+      notifiedInvitersRef.current.add(inviter);
     };
-    send();
-  }, [inviteKey, sendMessage, sessionId, username]);
+
+    notifyInviter();
+  }, [socketStatus, inviteKey, sendMessage, sessionId, username]);
 
   useEffect(() => {
     const backButton = WebApp?.BackButton;

@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 export default function Page() {
   const tutorials = [
     "Play a friend<br /> or challenge a<br /> stranger",
-    `101 boxes. Whoever<br />fills the most, wins!<br /><div style="margin-top: 4px">Earn <b style="color: #10b981">1500 points</b> for<br />playing & a <b style="color: #10b981">bonus</b><br /><b style="color: #10b981">3500 for winning</b>!</div>`,
+    `101 boxes. Whoever<br />fills the most, wins!<br /><div style="margin-top: 4px">Earn <b style="color: #10b981">1000 points</b> for<br />playing & a <b style="color: #10b981">bonus</b><br /><b style="color: #10b981">2000 for winning</b>!</div>`,
   ];
 
   const router = useRouter();

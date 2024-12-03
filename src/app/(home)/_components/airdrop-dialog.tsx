@@ -17,6 +17,7 @@ import { useAirdropNft } from "@/services/nft";
 import { GeneralContext } from "../../general-context";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import useScreenWidthRatio from "@/src/_hooks/use-screen-width-ratio";
+import useActions from "@/src/_hooks/useAction";
 
 const AirDropDialog = () => {
   const { sessionId } = useContext(GeneralContext);
@@ -26,6 +27,7 @@ const AirDropDialog = () => {
   const [currentStep, setCurrentStep] = React.useState<"WELCOME" | "CLAIMING">(
     "WELCOME"
   );
+  const { saveAction } = useActions();
   const [openAirDropDialog, setOpenAirDropDialog] = React.useState(false);
   const { mutateAsync: claimAirDrop } = useAirdropNft();
 
@@ -64,6 +66,7 @@ const AirDropDialog = () => {
   const handleWalletValue = useCallback(async () => {
     try {
       setConnecting(true);
+      saveAction('welcomeNFT_wallet_entered');
 
       await claimAirDrop({ wallet: walletValue, sessionId, type: "welcome" });
       setWalletStatus({
@@ -73,6 +76,7 @@ const AirDropDialog = () => {
         subTitle: "Check your wallet",
         btnLabel: "Great!",
       });
+      saveAction('welcomeNFT_successful_claim');
       localStorage.setItem("user.viewed.air.drop", "true");
       // pressedLater?.()
     } catch (error: any) {
@@ -202,8 +206,8 @@ const AirDropDialog = () => {
                           style={{
                             display: "block",
                             color: "#7B7B7B",
-                            fontWeight: "bold",
-                            lineHeight: "12px",
+                            fontWeight: "medium",
+                            lineHeight: "20px",
                           }}
                           className="text-xs"
                         >
@@ -218,8 +222,7 @@ const AirDropDialog = () => {
                             textAlign: "center",
                           }}
                         >
-                          Core Wallet, OKX Wallet, Coinbase Wallet or
-                          TrustWallet
+                          
                         </span>
                       </label>
                     </div>

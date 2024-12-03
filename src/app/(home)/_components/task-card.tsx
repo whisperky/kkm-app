@@ -1,11 +1,7 @@
 "use client";
 import { cn } from "@/lib/utils";
 import { CheckIcon } from "lucide-react";
-import {
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { useContext, useEffect, useState } from "react";
 import { IconSpinner } from "@/src/_components/icons";
 import { BonusContent, useCheckUserBonus } from "@/services/bonus";
 import toast from "react-hot-toast";
@@ -73,45 +69,53 @@ export default function TaskCard({
   });
 
   const delayedBonus = async (): Promise<boolean> => {
-    if (typeof window !== "undefined" && task?.details?.link) {
+    if (typeof window !== "undefined" && task?.details?.link)
       window.open(task?.details?.link, "_blank", "noopener,noreferrer");
-    }
     return new Promise(() => {
       setTimeout(() => {
-        if (userId && taskStatus !== "CLAIMED") {
-          addPoints();
-        }
-      }, 3000);
+        if (userId && taskStatus !== "CLAIMED") addPoints();
+      }, 10000);
     });
   };
   const checkIfUserInCommunity = async () => {
     const data = await baseInstance
       .get<ICheckCommunity>(
-        `/bonus-service/bonus/telegram/check-user-in-telegram-channel?sessionId=${userId}`
+        `/bonus-service/bonus/telegram/check-is-user-in-community`,
+        { params: { tgUserId: userId } }
       )
       .then((res) => res.data);
     return data;
   };
 
   const handleJoinCommunity = async () => {
+    const link =
+      process.env.NEXT_PUBLIC_COMMUNITY_URL || "https://t.me/kokomo_games";
     try {
       setTaskStatus("FETCHING");
       const res = await checkIfUserInCommunity();
+
       if (res?.inChannel) {
         refreshCheckUserBonus();
         setTaskStatus("CLAIMED");
         toast.success(
           task.details?.toast?.success ?? "Join telegram community successfully"
         );
-      } else if (!res?.inChannel) {
+      } else {
+        setTaskStatus("UNCLAIMED");
         toast.error(
           task.details?.toast?.error ??
             "You're not part of the Telegram community yet."
         );
-        window.open(task.details.link, "_blank", "noopener,noreferrer");
+        window.open(link, "_blank", "noopener,noreferrer");
       }
     } catch (error) {
       console.log(error);
+      setTaskStatus("UNCLAIMED");
+      toast.error(
+        task.details?.toast?.error ??
+          "You're not part of the Telegram community yet."
+      );
+      window.open(link, "_blank", "noopener,noreferrer");
     }
   };
   const handleInviteAfriend = () => {
@@ -141,6 +145,7 @@ export default function TaskCard({
     if (data?.data?.status?.toLowerCase?.() === "pending")
       setTaskStatus("PENDING");
     if (isCheckUserBonusError) setTaskStatus("FETCHING");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isCheckUserBonusError, data?.data?.status]);
 
   useEffect(() => {
@@ -224,7 +229,10 @@ export default function TaskCard({
           </div>
           {task.description.includes("Invite a friend") && claimOGTab && (
             <div className="!text-sm w-[95%] flex [&>*]:!flex-1 [&>*]:!py-0.5 flex-wrap pt-3 gap-3 border-0 border-t border-solid border-white/60">
-              <ShareButtons />
+              <ShareButtons
+                shareName="freeOGNFT_inviteTG_click"
+                copyName="freeOGNFT_copyLink_click"
+              />
             </div>
           )}
         </div>

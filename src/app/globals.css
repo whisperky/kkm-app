@@ -36,6 +36,7 @@ body {
   font-family: "MADE Tommy Soft", sans-serif;
   color: var(--foreground);
   background: var(--background);
+  background-color: #313124;
 }
 
 .separator-sm {

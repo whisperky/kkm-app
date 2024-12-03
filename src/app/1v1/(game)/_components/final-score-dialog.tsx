@@ -21,7 +21,7 @@ export default function FinalScoreDialog() {
   const router = useRouter();
   const { saveAction } = useActions();
 
-  const { sessionId } = useContext(GeneralContext);
+  const { sessionId, refreshMyScore } = useContext(GeneralContext);
   const { finalScoreData: data, setFinalScoreData } = useContext(SocketContext);
   const { resetMatch } = useContext(MatchContext);
   const winner = useMemo(
@@ -51,6 +51,12 @@ export default function FinalScoreDialog() {
       router.replace("/1v1/waiting");
     }, 500);
   }, [resetMatch, router, saveAction, setFinalScoreData]);
+
+  useEffect(() => {
+    return () => {
+      refreshMyScore?.();
+    };
+  }, [refreshMyScore]);
 
   if (!data) return null;
 
@@ -87,19 +93,21 @@ export default function FinalScoreDialog() {
               >
                 <p className="bg-black/15 text-white p-2 py-1 flex items-center justify-between">
                   <span className="text-start">{data?.playerOne?.name}</span>
-                  <span className="text-nowrap">{data?.playerOne?.score} 🥥</span>
+                  <span className="text-nowrap">
+                    {data?.playerOne?.score} 🥥
+                  </span>
                 </p>
                 <div className="p-2 text-sm">
                   <p className="font-bold text-xs text-start">Reward</p>
                   {data?.winnerId == data?.playerOne?.sessionId && (
                     <p className="flex justify-between">
                       <span className="text-start">Victory Bonus</span>{" "}
-                      <span className="text-end">+3,500 Points</span>
+                      <span className="text-end">+2,000 Points</span>
                     </p>
                   )}
                   <p className="flex justify-between">
                     <span className="text-start">Participation Bonus</span>{" "}
-                    <span className="text-end">+1,500 Points</span>
+                    <span className="text-end">+1,000 Points</span>
                   </p>
                 </div>
               </div>
@@ -113,18 +121,20 @@ export default function FinalScoreDialog() {
               >
                 <p className="bg-black/15 text-white p-2 py-1 flex items-center justify-between">
                   <span className="text-start">{data?.playerTwo?.name}</span>
-                  <span className="text-nowrap">{data?.playerTwo?.score} 🥥</span>
+                  <span className="text-nowrap">
+                    {data?.playerTwo?.score} 🥥
+                  </span>
                 </p>
                 <div className="p-2 text-sm">
                   {data?.winnerId == data?.playerTwo?.sessionId && (
                     <p className="flex justify-between">
                       <span className="text-start">Victory Bonus</span>{" "}
-                      <span className="text-end">+3,500 Points</span>
+                      <span className="text-end">+2,000 Points</span>
                     </p>
                   )}
                   <p className="flex justify-between">
                     <span className="text-start">Participation Bonus</span>{" "}
-                    <span className="text-end">+1,500 Points</span>
+                    <span className="text-end">+1,000 Points</span>
                   </p>
                 </div>
               </div>

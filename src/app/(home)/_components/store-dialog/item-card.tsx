@@ -1,4 +1,4 @@
-import Image, { StaticImageData } from "next/image";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/src/_components/ui/button";
 
@@ -10,13 +10,14 @@ import claimIcon from "@/_assets/icons/claim.png";
 import lockIcon from "@/_assets/icons/lock.png";
 import unlockIcon from "@/_assets/icons/unlock.png";
 import checkIcon from "@/_assets/icons/check.png";
+import ClaimCollactableDialog from "../free-og-nft-dialog/claim-collactable-dialog";
 
 interface StoreItemProps {
-  id: number;
+  id: string | number;
   title: string;
-  type: "store" | "claim" | "bundle";
+  type: "store" | "claim" | "bundle" | string;
   price: number | string;
-  icon: StaticImageData;
+  icon: any;
   isPopular?: boolean;
   size?: number;
   star?: boolean;
@@ -24,7 +25,15 @@ interface StoreItemProps {
   claimed?: boolean;
   lock?: boolean;
   unlockable?: boolean;
-  onClick?: () => void;
+  onClick?: (
+    _action: "claim" | "buy" | "collect",
+    _e: any,
+    _data?: Record<string, any>
+  ) => void;
+  current_day?: number;
+  last_update?: Date;
+  itemId?: string;
+  rewards?: { kokos?: number; spins?: number; collectibles?: number };
 }
 
 const StarDecorations = () => (
@@ -53,30 +62,9 @@ const StarDecorations = () => (
   </>
 );
 
-const ItemTitle = ({
-  type,
-  id,
-  title,
-}: Pick<StoreItemProps, "type" | "id" | "title">) => (
+const ItemTitle = ({ title }: Pick<StoreItemProps, "title">) => (
   <div className="flex-grow text-xs py-1.5 px-1 font-medium bg-light-tan text-golden-brown text-center z-2 border-t-[1px] border-[#FCEAD080]">
-    {type === "bundle" ? (
-      title === "Kokomo Mega Bundle" ? (
-        title
-      ) : (
-        <p>
-          {title.split("Kokos ")[0]}Kokos <br />
-          {title.split("Kokos ")[1]}
-        </p>
-      )
-    ) : type === "claim" ? (
-      <p>
-        Kokomo <br /> Collectible #{id}
-      </p>
-    ) : (
-      <p>
-        {id} Kokomo <br /> Collectibles
-      </p>
-    )}
+    <p>{title}</p>
   </div>
 );
 
@@ -100,7 +88,7 @@ const UnlockableOverlay = ({
             Come back to Collect!
           </p>
           <p className="text-purple text-[10px] text-center font-medium px-2">
-            Day {id}
+            Day {Number(id) + 1}
           </p>
         </>
       )}
@@ -108,6 +96,7 @@ const UnlockableOverlay = ({
   </div>
 );
 
+// eslint-disable-next-line complexity
 export default function StoreItem({
   id,
   title,
@@ -121,34 +110,66 @@ export default function StoreItem({
   lock = false,
   unlockable = false,
   size = 60,
+  current_day = 0,
+  last_update,
+  itemId,
+  rewards,
   onClick,
 }: StoreItemProps) {
   const renderButtonContent = () => {
     if (type === "bundle") {
       return (
-        <ClaimDialog type={id}>
+        <ClaimDialog
+          onClick={(e) => onClick?.("buy", e)}
+          type={type}
+          data={{
+            title,
+            price,
+            icon,
+            rewards,
+            current_day,
+            last_update,
+            itemId,
+            star,
+          }}
+        >
           <div className="flex w-full items-center justify-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
             {`$${price}`}
           </div>
         </ClaimDialog>
       );
-    }
-
-    if (type === "store") {
-      if (purchased) {
+    } else if (type === "store") {
+      if (purchased)
         return (
-          <ClaimDialog type="store">
+          <ClaimDialog
+            onClick={(e) => onClick?.("claim", e)}
+            type="store"
+            data={{
+              title,
+              price,
+              icon,
+              rewards,
+              current_day,
+              last_update,
+              itemId,
+            }}
+          >
             <div className="flex w-full items-center justify-center drop-shadow-[0_1px_0px_#00000029]">
-              <Image src={claimIcon} alt="Claim" width={13} height={13} />
+              <Image src={claimIcon} alt="Claim" width={14} height={14} />
               Claim
             </div>
           </ClaimDialog>
         );
-      }
-      return `$${price}`;
-    }
 
-    if (claimed) {
+      return (
+        <div
+          onClick={(e) => onClick?.("buy", e)}
+          className="flex w-full items-center justify-center rounded-lg drop-shadow-[0_1px_0px_#00000029]"
+        >
+          ${price}
+        </div>
+      );
+    } else if (claimed) {
       return (
         <div className="flex items-center">
           <Image src={checkIcon} alt="Claim" width={16} height={16} />
@@ -157,9 +178,22 @@ export default function StoreItem({
     }
 
     return (
-      <div className="flex items-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
-        Collect
-      </div>
+      <ClaimCollactableDialog
+        onSubmitEnd={(e) => onClick?.("collect", e)}
+        current_day={current_day}
+        id={itemId}
+      >
+        {({ setOpenModal }) => (
+          <div
+            onClick={() => {
+              setOpenModal?.(true);
+            }}
+            className="flex items-center rounded-lg drop-shadow-[0_1px_0px_#00000029]"
+          >
+            Collect
+          </div>
+        )}
+      </ClaimCollactableDialog>
     );
   };
 
@@ -171,14 +205,14 @@ export default function StoreItem({
           alt="Popular"
           width={36}
           height={36}
-          className="absolute -top-5 -left-1 z-10"
+          className="absolute -top-5 -left-1 z-20"
         />
       )}
 
       <div
         className={cn(
           "w-full py-2 bg-light-orange rounded-t-lg rounded-b-none flex items-center justify-center text-2xl border-b-[1px] border-[#B89D9880]",
-          size === 44 ? "py-4" : ""
+          size === 44 && "py-4"
         )}
       >
         <div className="relative">
@@ -204,26 +238,25 @@ export default function StoreItem({
         </div>
       </div>
 
-      <ItemTitle type={type} id={id} title={title} />
+      <ItemTitle title={title} />
 
       <Button
-        onClick={onClick}
         className={cn(
           "w-full h-6 p-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-500 active:bg-neutral-600",
           type === "claim"
             ? claimed
-              ? "bg-green"
-              : "bg-purple"
+              ? "bg-green hover:bg-green"
+              : "bg-purple hover:bg-purple"
             : purchased
-            ? "bg-purple"
-            : "bg-green"
+            ? "bg-purple hover:bg-purple"
+            : "bg-green hover:bg-green"
         )}
       >
         {renderButtonContent()}
       </Button>
 
       {/* {star && !(type === "claim" && unlockable) && <StarDecorations />} */}
-      {type === "claim" && unlockable ? (
+      {type === "claim" && (unlockable || lock) ? (
         <UnlockableOverlay lock={lock} id={id} />
       ) : (
         star && <StarDecorations />

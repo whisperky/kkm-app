@@ -94,13 +94,13 @@ export default function FreeOGNFTDialog() {
           ))}
       </BoxContent>
       <div className="flex justify-center py-4">
-        <ClaimNFTDialog>
+        <ClaimNFTDialog type={"task"}>
           {({ setOpenModal, claimable }) => (
             <Button
               onClick={() => {
-                if (claimable) return;
-                setOpenModal(true);
-                localStorage.setItem("nft-flow", "true");
+                if (!claimable) return;
+                setOpenModal?.(true);
+                localStorage.setItem('nft-flow', 'true');
                 saveAction("freeOGNFT_claim_click");
               }}
               disabled={!claimable || count < 3}

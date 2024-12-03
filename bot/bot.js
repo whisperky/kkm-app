@@ -5,21 +5,18 @@ config();
 import express from "express";
 import axios from "axios";
 import { Telegraf } from "telegraf";
-import { v2 as cloudinary } from 'cloudinary';
 
 const app = express();
-const port = process.env.PORT || 4000;
+const port = process.env.PORT || 6000;
 
 const {
   BOT_API_TOKEN: TELEGRAM_BOT_TOKEN,
   HOST_URL,
   NEXT_PUBLIC_APP_API_BASE_URL: BACKEND_URL,
-  NEXT_PUBLIC_HOSTED_BOT_URL,
-  CLOUD_NAME,
-  CLOUD_KEY,
-  CLOUD_SECRET,
 } = process.env;
 const USER_CREATION_ENDPOINT = `${BACKEND_URL}/user-service/users`;
+const GLACIER_API_URL =
+  "https://glacier-api.avax.network/v1/chains/43114/addresses";
 
 const emojis = {
   sparkles: "✨",
@@ -32,16 +29,47 @@ const emojis = {
   coconut: "🥥",
 };
 
-// Replace with your actual credentials
+/**
+ * Fetch NFTs for a given wallet address using the Glacier API.
+ * @param {string} walletAddress - The wallet address to fetch NFTs for.
+ * @returns {Promise<Array>} - Returns a promise with an array of NFT details.
+ */
+async function fetchNftsForWallet(walletAddress) {
+  const url = `${GLACIER_API_URL}/${walletAddress}/balances:listErc721`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.status === 200) {
+      const data = response.data;
+
+      if (data.erc721TokenBalances) {
+        return data.erc721TokenBalances.map((nft) => ({
+          name: nft.name || "Unknown",
+          tokenId: nft.tokenId || "Unknown",
+          contractAddress: nft.contractAddress || "Unknown",
+        }));
+      } else {
+        console.log("No ERC-721 token balances found for this wallet.");
+        return [];
+      }
+    } else {
+      console.error(
+        `Failed to fetch NFTs: ${response.status} - ${response.statusText}`
+      );
+      throw new Error("Failed to fetch NFTs.");
+    }
+  } catch (error) {
+    console.error("Error fetching NFTs:", error.message);
+    throw error;
+  }
+}
+
 const bot = new Telegraf(TELEGRAM_BOT_TOKEN);
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: CLOUD_NAME,
-  api_key: CLOUD_KEY,
-  api_secret: CLOUD_SECRET,
-});
-
 
 const gameImageURL =
   "https://www.kokomo.games/assets/Kokomo-games-C_v_d2aL.png";
@@ -50,43 +78,266 @@ const socialFiImageURL =
 
 const referrals = {};
 
+// Decode invite key
+export function decodeInviteKey(key) {
+  if (!key || typeof key !== "string") {
+    console.error("Invalid key provided to decodeInviteKey:", key);
+    return { createdAt: null, originalKey: key, sessionId: null };
+  }
+
+  const chars =
+    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+  function fromBase62(str) {
+    if (!str || typeof str !== "string") {
+      console.error("Invalid input for fromBase62:", str);
+      return 0;
+    }
+
+    return str
+      .split("")
+      .reduce((prev, curr) => prev * 62 + chars.indexOf(curr), 0);
+  }
+
+  const [, timestampPart, data] = key.split("-");
+  const timestamp = fromBase62(timestampPart);
+  const date = new Date(timestamp);
+
+  const sessionId = data ? fromBase62(data) : "";
+
+  return {
+    createdAt: date,
+    originalKey: key,
+    sessionId,
+  };
+}
+
+// Function to ensure "1v1" and "NFT Help" always work
+async function sendNftHelp(ctx, type) {
+  try {
+    // Step 1: Extract the User ID
+    const userId = ctx.from.id;
+
+    // Step 2: Fetch NFT Data using the User ID
+    const nftResponse = await axios.get(
+      `https://kokomogames.com/api/v1/nft-service/nft/airdrop/all?size=10&start=0&sessionId=${userId}`
+    );
+
+    // Step 3: Extract Data
+    const nftData = nftResponse.data.data.data;
+
+    if (!nftData || nftData.length === 0) {
+      await ctx.reply("No NFTs found for your account.");
+      return;
+    }
+
+    console.log(nftData);
+    console.log(type);
+
+    // Step 4: Retrieve Wallet Address from the Response
+    const walletAddress = nftData[0]?.walletAddress;
+
+    if (!walletAddress) {
+      await ctx.reply("No wallet address associated with your account.");
+      return;
+    }
+
+    // Step 5: Fetch Specific NFT Data Based on Type
+    let specificNfts;
+    let contractAddress;
+
+    if (type === "welcome") {
+      specificNfts = await findSpecificNfts(walletAddress, {
+        name: " Kokomo Welcome Collectible",
+      });
+      contractAddress = "0xDfD70334de54E30E532a2836d5D4A7C849245D45";
+    } else if (type === "OG") {
+      specificNfts = await findSpecificNfts(walletAddress, {
+        name: "Kokomo Classic OG",
+      });
+      contractAddress = "0x9cE96704a5F5AA60A2F8e2A87bb54ec82BecBaab";
+    } else {
+      await ctx.reply("Invalid NFT type specified.");
+      return;
+    }
+
+    if (!specificNfts || specificNfts.length === 0) {
+      await ctx.reply(`No specific NFTs found for the type: ${type}.`);
+      return;
+    }
+
+    console.log(specificNfts[0][0]);
+    // Extract the first NFT ID (or process multiple if needed)
+    const tokenId = specificNfts[0].tokenId;
+
+    if (!tokenId) {
+      await ctx.reply("No valid NFT ID found for your account.");
+      return;
+    }
+
+    console.log(`NFT ID: ${tokenId}`);
+    console.log(`Type: ${type}`);
+
+    // Step 6: Respond with Type-Specific Help Message
+    if (type === "welcome") {
+      await sendWelcomeNftHelp(ctx, tokenId, contractAddress);
+    } else if (type === "OG") {
+      await sendOgNftHelp(ctx, tokenId, contractAddress);
+    }
+  } catch (error) {
+    console.error("Error fetching NFTs:", error.message);
+    await ctx.reply(
+      "An error occurred while fetching your NFTs. Please try again later."
+    );
+  }
+}
+
+async function sendWelcomeNftHelp(ctx, tokenId, contractAddress) {
+  const message = `<b><i>If you entered a MetaMask address:</i></b>
+1️⃣ Open your wallet and change network to 'Avalanche Network C-Chain'
+2️⃣ Go to your NFTs, and look for 'Import NFT'
+3️⃣ Enter the details below:
+<b>Contract Address:</b> ${contractAddress}
+<b>Token ID:</b> ${tokenId}
+
+*<i>*Sometimes Avalanche NFTs don't show in MetaMask mobile. This is a MetaMask issue - check on MetaMask browser or OpenSea to see your Kokomo NFT!</i>*
+
+<b><i>If you entered a Rabby Wallet address:</i></b>
+1️⃣ Open your wallet and go to the activity tab: 🕒
+2️⃣ Look for the correct mint transaction: 📜 mint ${contractAddress.slice(
+    0,
+    5
+  )}…${contractAddress.slice(-4)}
+3️⃣ Click the green text to the right of the small NFT icon: + 1 #x
+
+<b><i>If you want to view your NFT in OpenSea:</i></b>
+1️⃣ Go to opensea.io and log-in by connecting the wallet you used to mint
+2️⃣ Go to your OpenSea profile
+3️⃣ If you can't see your Kokomo NFT, press More and click Hidden. Then move it out of there!
+
+If you still need further support, join us in our Early Kokomons chat: @early_kokomons`;
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "🎮 Play 1M1",
+          url: "https://t.me/One_Million_One_bot/game_on",
+        },
+      ],
+      [{ text: "🤟 Join the Community", url: "https://t.me/kokomo_games" }],
+    ],
+  };
+
+  await ctx.reply(message, {
+    parse_mode: "HTML",
+    reply_markup: replyMarkup,
+  });
+}
+
+async function sendOgNftHelp(ctx, tokenId, contractAddress) {
+  const message = `<b><i>If you entered a MetaMask address:</i></b>
+1️⃣ Open your wallet and change network to 'Avalanche Network C-Chain'
+2️⃣ Go to your NFTs, and look for 'Import NFT' or similar
+3️⃣ Enter the details below:
+<b>Contract Address:</b> ${contractAddress}
+<b>Token ID:</b> ${tokenId}
+
+*<i>*Sometimes Avalanche NFTs don't show in MetaMask mobile. This is a MetaMask issue - check on MetaMask browser or OpenSea to see your Kokomo NFT!</i>*
+
+<b><i>If you entered a Rabby Wallet address:</i></b>
+1️⃣ Open your wallet and go to the activity tab: 🕒
+2️⃣ Look for the correct mint transaction: 📜 mint ${contractAddress.slice(
+    0,
+    5
+  )}…${contractAddress.slice(-4)}
+3️⃣ Click the green text to the right of the small NFT icon: + 1 #x
+
+<b><i>If you want to view your NFT in OpenSea:</i></b>
+1️⃣ Go to opensea.io and log-in by connecting the wallet you used to mint
+2️⃣ Go to your OpenSea profile
+3️⃣ If you can't see your Kokomo NFT, press More and click Hidden. Then move it out of there!
+
+If you still need further support, join us in our Early Kokomons chat: @early_kokomons`;
+
+  const replyMarkup = {
+    inline_keyboard: [
+      [
+        {
+          text: "🎮 Play 1M1",
+          url: "https://t.me/One_Million_One_bot/game_on",
+        },
+      ],
+      [{ text: "🤟 Join the Community", url: "https://t.me/kokomo_games" }],
+    ],
+  };
+
+  await ctx.reply(message, {
+    parse_mode: "HTML",
+    reply_markup: replyMarkup,
+  });
+}
+
+/**
+ * Fetch specific NFTs based on provided criteria.
+ * @param {string} walletAddress - The wallet address to fetch NFTs for.
+ * @param {Object} criteria - The criteria to filter NFTs.
+ * @returns {Promise<Array>} - Returns a promise with an array of NFT details.
+ */
+async function findSpecificNfts(walletAddress, criteria) {
+  const url = `${GLACIER_API_URL}/${walletAddress}/balances:listErc721`;
+
+  try {
+    const response = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json",
+        "x-glacier-api-key":
+          "ac_9IcrCll7cf777AKIkvO_dsXOvtRRVcKvtNPw4_D9UlWwJimu93V0homFCkZrY_SYjj2qmFFZib8K7WHIJapsJQ",
+      },
+    });
+
+    const data = response.data;
+    // console.log("API Response:", data); // Debugging log
+
+    if (data.erc721TokenBalances) {
+      return data.erc721TokenBalances;
+    } else {
+      console.log("No ERC-721 token balances found for this wallet.");
+      return [];
+    }
+  } catch (error) {
+    console.error("Error fetching NFTs:", error.message);
+    throw error;
+  }
+}
+
+bot.action(/view_nft_(.+)/, async (ctx) => {
+  const tokenId = ctx.match[1];
+  // Fetch and display detailed information about the NFT with the given tokenId
+  await ctx.reply(`Fetching details for NFT with Token ID: ${tokenId}`);
+  // Implement the logic to fetch and display the NFT details here
+  ctx.answerCbQuery(); // Acknowledge the callback query
+});
+
 bot.start(async (ctx) => {
   try {
     const username = ctx?.from?.username || ctx?.from?.first_name || "Player";
     const [type, code] = ctx?.message?.text?.split?.("_") || [];
     const userId = ctx?.from?.id;
-    const [, typeKey] = `${type || ''}`.split(' ')
-    const userPhotos = await ctx.telegram.getUserProfilePhotos(ctx.from.id);
-
-    const fileId = userPhotos?.photos?.[0]?.at(-1)?.file_id;
-    const file = fileId ? await ctx.telegram.getFile(fileId) : null;
-    const photoUrl = file ? `https://api.telegram.org/file/bot${bot.token}/${file.file_path}` : '';
+    const [, typeKey] = `${type || ""}`.split(" ");
+    const friend_app = `${HOST_URL}/1v1/waiting?inviteKey=${code}`;
+    const { sessionId: inviter } = code ? decodeInviteKey(code) : {};
 
     console.log("refCode", code);
     console.log("Username", username);
-    console.log("photoUrl", photoUrl);
-
-    let result = {}
-    if (photoUrl) {
-      // Download the image
-      const response = await axios.get(photoUrl, { responseType: 'arraybuffer' });
-      const buffer = Buffer.from(response.data, 'binary');
-
-      // Upload to Cloudinary
-      result = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
-          if (error) reject(error);
-          else resolve(result);
-        }).end(buffer);
-      });
-    }
 
     let userData = null;
 
+    // Get user data
     try {
       const res = await axios.get(`${USER_CREATION_ENDPOINT}/${userId}`);
       userData = res?.data?.data?.user;
-      console.log('typeKey =>', typeKey);
+      console.log("typeKey =>", typeKey);
       console.log("Start User Info => ", userData);
     } catch (error) {
       if ([400, 404]?.includes(error?.response?.status))
@@ -94,102 +345,81 @@ bot.start(async (ctx) => {
       else console.error("Error fetching user:", error);
     }
 
+    // Send message to inviter
+    if (typeKey == "GI" && inviter) {
+      await ctx.replyWithHTML(
+        `💥 <b>Your 1v1 is ready!</b>
+
+Enter the waiting room to claim your Kokos and compete for the prize.
+
+May the best tapper win!`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "🎮 Play With Friend Now",
+                  web_app: { url: friend_app },
+                },
+              ],
+            ],
+          },
+        }
+      );
+    } else {
+      ctx.replyWithHTML(
+        `<b>Welcome to the official launch of One Million and One Kokos!</b>
+
+Hit <b>Play Now</b> to start earning Kokomo Points - Kokos 🥥
+
+🕹️ <b>Farm Kokos</b> on the main board, challenge other players in <b>real-time 1v1 battles</b>, or try the <b>Koko Spinner</b> for rewards! 🎡
+
+<b>Why do Points matter:</b>
+🥥 Points carry over across the whole Kokomo ecosystem.
+👀 More Kokos = better Rewards… including Airdrop!
+💎 Claim free Kokomo NFTs inside the game to unlock future perks and rewards! 🤑
+
+<i>P.S. Inviting friends won't go unnoticed. We don't forget to reward our most loyal Kokomons 😉</i>`,
+        {
+          reply_markup: {
+            inline_keyboard: [
+              [
+                {
+                  text: "🎮 Play Now",
+                  url: `https://t.me/One_Million_One_bot/game_on`,
+                },
+              ],
+              [
+                {
+                  text: "🥥 Join the Community",
+                  url: "https://t.me/kokomo_games",
+                },
+              ],
+              [{ text: "🌴 Game Guide", callback_data: "game_guide" }],
+            ],
+          },
+        }
+      );
+    }
+
+    // Create or update user
     try {
       if (!userData?.id) {
         await axios.post(USER_CREATION_ENDPOINT, {
           sessionId: ctx.from.id,
           username: ctx.from.username || "",
-          photo_url: result?.secure_url || "",
           referrerSessionId: code || "",
         });
       } else {
-        await axios.patch(`${USER_CREATION_ENDPOINT}/${ctx.from.id}`, {
+        axios.patch(`${USER_CREATION_ENDPOINT}/${ctx.from.id}`, {
           username: ctx.from.username || "",
-          photo_url: result?.secure_url || "",
         });
-        await axios.patch(`${BACKEND_URL}/game-service/users/${userId}`, {
-          photo_url: result?.secure_url
-        })
       }
     } catch (error) {
-      console.error("Error Creating user:", error);
+      console.error("Error creating/updating user:", error?.message);
     }
 
-    ctx.replyWithHTML(
-      `Hey ${username}! 🏝️
-
-<b>Hit Play Now to start your Koko journey.</b>
-
-Compete to score the most points while working together to complete the Match by filling all One Million and One Kokos. But beware of sabotage! You can also uncheck already filled Kokos and refill them for yourself... 😈
-
-<b>Rules?</b>
-🟢 Score +1 point by tapping an empty box and filling it with a Koko. Your Kokos show as green. 
-🔴 Other player Kokos show as red. If you tap a red Koko, the box empties and the person who originally filled that box loses -1 point. You can then refill it yourself for +1. This is called a <b>sabotage.</b>
-💥 Streaks: earn bonus points for filling, or sabotaging, milestone amounts of Kokos. The first Streak bonus is achieved by filling/sabotaging 100 Kokos.
-
-<b>Seasons</b>
-There will be multiple Matches per Season of 1M1, with each Season introducing more and more game mechanics. Expect Leaderboards, Challenges and Teams. 
-
-<b>Why?</b>
-👀 Every point counts. <b>Your score will carry over</b> to other components of the Kokomo ecosystem.
-🥥 Inviting friends won't go unnoticed. We don't forget to reward our most loyal Kokomons.
-💎 And you can claim a <b>free Kokomo OG NFT</b> inside which unlocks future perks, benefits and rewards.
-
-Trust us, you'll really want it.`,
-      {
-        reply_markup: {
-          inline_keyboard: [
-            [
-              typeKey == 'GI' ? {
-                text: "🎮Play With Friend Now",
-                web_app: {
-                  url: `${HOST_URL}/1v1/waiting?inviteKey=${code}`,
-                },
-              } :
-                {
-                  text: "🎮Play Now",
-                  web_app: {
-                    url: `${HOST_URL}`,
-                  },
-                },
-            ],
-            [
-              {
-                text: "🥥Join the Community",
-                url: "https://t.me/kokomo_games",
-              },
-            ],
-            [
-              {
-                text: "🌴 Game Guide",
-                callback_data: "game_guide",
-              },
-            ],
-            // ...(isSuperTester
-            //   ? [
-            //       [
-            //         {
-            //           text: "💻 Add Tester",
-            //           callback_data: "add_tester",
-            //         },
-            //         {
-            //           text: "🗑 Remove Tester",
-            //           callback_data: "remove_tester",
-            //         },
-            //       ],
-            //       [
-            //         {
-            //           text: "📊 View Testers",
-            //           callback_data: "view_testers",
-            //         },
-            //       ],
-            //     ]
-            //   : []),
-          ],
-        },
-      },
-    );
-
+    // Handle referrals
     if (code) {
       referrals[ctx.from.id] = code;
       console.log(`User ${ctx.from.id} referred by ${code}`);
@@ -199,185 +429,41 @@ Trust us, you'll really want it.`,
   }
 });
 
-bot.action("game_guide", (ctx) => {
-  ctx.answerCbQuery();
-  ctx.replyWithHTML(
-    `🌴 Koko Guide
-  
-Welcome to your Koko Journey!
-  
-Work together as a Community to fill Kokos by tapping, complete Matches, and progress through the 1M1 seasons while farming your points and growing your Koko score. Or untap, if you prefer to sabotage🥷
+// bot.command("nft_help", async (ctx) => {
+//   await ctx.reply("Please enter your wallet address:");
+//   bot.on("text", async (ctx) => {
+//     const walletAddress = ctx.message.text.trim();
+//     await sendNftHelp(ctx, walletAddress);
+//   });
+// });
 
-There will be multiple 1M1 Matches per Season. A Match ends when all Kokos are filled, at which point the board will be reset - meaning multiple opportunities to grow your scores. Each Season will introduce deeper game mechanics like Challenges, Missions, Leaderboards and Teams.  
+bot.on("callback_query", async (ctx) => {
+  try {
+    const callbackData = ctx.callbackQuery.data;
+    console.log("Callback Data:", callbackData); // Log callback data for debugging
 
-Your performance in 1M1 won't go unnoticed, and neither will your social activity. The more, the better. 👀
+    const [action, actionType, type] = callbackData.split("_");
 
-<b>How to Play:</b>
-
-<b>💥 Season 0: the base version of 1M1</b>
-Tap empty boxes to earn points. Sabotage other players by unfilling their boxes and refilling them for yourself. 
-
-🟢 Score +1 point by tapping an empty box and filling it with a Koko. Your Kokos show as green. 
-🔴 Other player Kokos show as red. If you tap a red Koko, the box empties and the person who originally filled that box loses -1 point. You can then refill it yourself for +1. This is called a <b>sabotage.</b>
-💥 Streaks: earn bonus points for filling, or sabotaging, milestone amounts of Kokos. The first Streak bonus is achieved by filling/sabotaging 100 Kokos.
-
-<b>👥 Season 1 onwards</b>
-Challenges, Leaderboards, Teams, and more. There will be multiple opportunities to farm points and grow your Koko score.
-
-<b>Mint Your Free Kokomo OG NFT:</b>
-  
-📲 <b>Complete 3 social tasks</b> to claim <b>your free OG NFT</b>. This certifies your OG status, unlocking ongoing utility and future rewards.
-  
-🤫 <b>Hint: </b> Holding this NFT could be very beneficial when we launch other parts of our ecosystem. Remember, things carry over.
-
-<b>Note:</b> There is a max supply of <b>rare Diamond OG NFTs</b>, available by WL only.
-
-<b>Note2: Classic OG NFTs</b> will be available for any new player on an ongoing basis, but for a limited time only.
-
-<b>Why Play 1M1?</b>:
-
-👀 Every point counts. <b>Your score will carry over</b> to other components of the Kokomo ecosystem.
-🥥 Inviting friends won't go unnoticed. We don't forget to reward our most loyal Kokomons.
-💎 And you can claim a <b>free Kokomo OG NFT</b> inside which unlocks future perks, benefits and rewards.
-  
-Trust us, you'll really want it.`,
-    {
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: "🎮Play Now",
-              web_app: {
-                url: `${HOST_URL}`,
-              },
-            },
-          ],
-          [
-            {
-              text: "🥥Join the Community",
-              url: "https://t.me/kokomo_games",
-            },
-          ],
-        ],
-      },
-    },
-    {
-      parse_mode: "HTML",
-    },
-  );
-});
-
-bot.action("add_tester", async (ctx) => {
-  ctx.answerCbQuery();
-
-  const askUsername = await ctx.reply(
-    "Please enter the username of the tester:",
-  );
-
-  bot.on("text", async (textCtx) => {
     if (
-      textCtx.message.reply_to_message &&
-      textCtx.message.reply_to_message.message_id === askUsername.message_id
+      action === "get" &&
+      actionType === "nft-help" &&
+      ["welcome", "OG"].includes(type)
     ) {
-      const username = textCtx.message.text;
-
-      try {
-        const response = await fetch(`${BACKEND_URL}/api/v1/beta-tester/add`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ username }),
-        });
-
-        if (response.ok) {
-          ctx.reply(`Tester ${username} has been successfully added!`);
-        } else {
-          ctx.reply(
-            `Failed to add tester ${username}. Please try again later.`,
-          );
-        }
-      } catch (error) {
-        console.error("Error adding tester:", error);
-        ctx.reply(
-          "An error occurred while adding the tester. Please try again later.",
-        );
-      }
-
-      bot.off("text");
+      await sendNftHelp(ctx, type);
+    } else {
+      await ctx.reply("Invalid action or type. Please try again.");
     }
-  });
-});
-bot.action("remove_tester", async (ctx) => {
-  ctx.answerCbQuery();
 
-  const askUsername = await ctx.reply(
-    "Please enter the username of the tester:",
-  );
-
-  bot.on("text", async (textCtx) => {
-    if (
-      textCtx.message.reply_to_message &&
-      textCtx.message.reply_to_message.message_id === askUsername.message_id
-    ) {
-      const username = textCtx.message.text;
-
-      try {
-        const response = await fetch(
-          `${BACKEND_URL}/api/v1/beta-tester/remove`,
-          {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ username }),
-          },
-        );
-
-        if (response.ok) {
-          ctx.reply(`Tester ${username} has been successfully removed!`);
-        } else {
-          ctx.reply(
-            `Failed to remove tester ${username}. Please try again later.`,
-          );
-        }
-      } catch (error) {
-        console.error("Error removing tester:", error);
-        ctx.reply(
-          "An error occurred while removing the tester. Please try again later.",
-        );
-      }
-
-      bot.off("text");
-    }
-  });
-});
-
-bot.action("leaderboard", (ctx) => {
-  ctx.answerCbQuery();
-  ctx.reply("Leaderboard coming soon! 🏆");
-});
-
-bot.command("gameinfo", (ctx) => {
-  ctx.replyWithPhoto(gameImageURL, {
-    caption: `<b>One Million and One Kokos Game Description:</b>\n\nA simple but addictive clicker game like Notcoin.\nUse your energy to click as fast as possible!\nRecharge your energy and keep clicking to the top! ${emojis.coconut}`,
-    parse_mode: "HTML",
-  });
-});
-
-bot.command("socialfi", (ctx) => {
-  ctx.replyWithPhoto(socialFiImageURL, {
-    caption: `<b>One Million and One Kokos SocialFi/Points System:</b>\n\n${emojis.trophy} Top Inviter Prizes!\n${emojis.energy} Earn points for inviting friends!\n👥 Share points with your friends!\n${emojis.fire} Top clicker of the day bonuses!\nAnd more...`,
-    parse_mode: "HTML",
-  });
+    ctx.answerCbQuery();
+  } catch (error) {
+    console.error("Error handling callback query:", error);
+    await ctx.reply("An error occurred while processing your request.");
+  }
 });
 
 app.get("/", (req, res) => {
   res.send("Telegram bot is running!");
 });
-
-// app.use(bot.webhookCallback("/secret-path"));
-// bot.telegram.setWebhook(`${NEXT_PUBLIC_HOSTED_BOT_URL}/secret-path`);
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);

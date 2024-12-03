@@ -66,7 +66,7 @@ export default function MoreSpins({
           Get More Spins
         </ConnectButton>
       </DialogTrigger>
-      <DialogContent title="More Spins" containerClassName="h-full">
+      <DialogContent title="More Spins" containerClassName="h-full" className="w-dvw">
         <BoxMain className="h-full text-golden-brown text-base font-semibold space-y-3 p-2 pt-6">
           <div>
             <p className="text-sm text-golden-brown/70">

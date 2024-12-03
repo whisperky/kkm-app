@@ -25,6 +25,7 @@ export default function BottomSection() {
           onClick={() => {
             router.push("/season-one");
             saveAction("home_play_button_click");
+            saveAction('home_playS1_button_click')
           }}
           className="w-full justify-center font-extrabold"
         >
@@ -33,6 +34,7 @@ export default function BottomSection() {
         <ConnectButton
           onClick={() => {
             router.push("/1v1");
+            saveAction('home_play1v1_button_click');
           }}
           className="w-full justify-center font-extrabold"
           color="#A1C41F"
@@ -42,7 +44,12 @@ export default function BottomSection() {
         <ConnectButton
           className="w-full justify-center relative font-extrabold"
           color="#23B3B2"
-          onClick={() => router.push("/spinner")}
+          onClick={() => {
+            router.push("/spinner");
+            saveAction('home_playSpinner_button_click');
+          }
+            
+          }
         >
           <span>Koko Spinner</span>
           <span className="absolute -right-1 -top-1 size-6 inline-flex justify-center items-center rounded-full bg-[#18C75E] text-white shadow-[0_.12rem] shadow-black/30">

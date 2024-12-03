@@ -64,7 +64,7 @@ export default function NFTSection() {
   );
 
   return (
-    <ClaimNFTDialog>
+    <ClaimNFTDialog type={"welcome"}>
       {({ claimable, setOpenModal }) => {
         const secondSlide = (
           <div key="claimNFT" className="px-4">
@@ -85,7 +85,9 @@ export default function NFTSection() {
               <button
                 onClick={() => {
                   setOpenModal?.(true);
+                  localStorage.setItem('nft-flow', 'true');
                   saveAction("home_welcomeNFT_claimNow_click");
+                  saveAction("welcomeNFT_claim_click")
                 }}
                 className="bg-[#20AA58] shadow-[0_0.15rem] shadow-[#2C7C4C] text-white w-full p-2 px-4"
               >

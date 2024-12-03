@@ -35,6 +35,25 @@ export function useAirdropNft() {
   });
 }
 
+export function useClaimCollectable() {
+  return useMutation({
+    mutationKey: ["claim-collectable"],
+    mutationFn: ({
+      sessionId,
+      wallet,
+    }: {
+      sessionId: TSessionId;
+      wallet: string;
+    }) =>
+      baseInstance
+        .post<{ message: string }>(`/nft-service/nft/collectible/mint`, {
+          sessionId,
+          walletAddress: wallet,
+        })
+        .then((res) => res.data),
+  });
+}
+
 export function useAirdropCheck() {
   return useMutation({
     mutationKey: ["airdrop-check"],
@@ -50,6 +69,18 @@ export function useAirdropCheck() {
           `/nft-service/nft/airdrop/check`,
           { params: { sessionId, type } }
         )
+        .then((res) => res.data),
+  });
+}
+
+export function useCheckWallet() {
+  return useMutation({
+    mutationKey: ["check-wallet"],
+    mutationFn: ({ wallet }: { wallet: string }) =>
+      baseInstance
+        .get<{ data: boolean }>(`/nft-service/nft/airdrop/check-wallet`, {
+          params: { walletAddress: wallet },
+        })
         .then((res) => res.data),
   });
 }

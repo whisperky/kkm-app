@@ -6,12 +6,13 @@ import Provider from "./provider";
 // import type { Metadata } from "next";
 import { bumperStickerFont, madeTommySoftFont } from "@/lib/fonts";
 import SplashScreen from "./(home)/_components/splash";
-import { useEffect } from "react";
+import BottomNavbarOverlayImage from "@/_assets/bottom-navbar-overlay.png";
+import ButtonStoneImage from "@/_assets/button-stone.png";
 
-// export const metadata: Metadata = {
-//   title: "One Million & One Kokos Season One",
-//   description: "One Million and One Kokos Season One",
-// };
+import { useEffect } from "react";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { BREAKPOINTS } from "../_utils/deviceUtils";
 
 export default function RootLayout({
   children,
@@ -33,7 +34,6 @@ export default function RootLayout({
       document.removeEventListener("touchmove", preventZoom);
     };
   }, []);
-
   return (
     <html lang="en">
       <head>
@@ -42,7 +42,20 @@ export default function RootLayout({
         <meta
           name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-        ></meta>
+        />
+        <link
+          rel="preload"
+          href={ButtonStoneImage.src}
+          as="image"
+          type="image/png"
+          media={`(max-width: ${BREAKPOINTS.md}px)`}
+        />
+        <link
+          rel="preload"
+          href={BottomNavbarOverlayImage.src}
+          as="image"
+          type="image/png"
+        />
       </head>
       <body
         className={cn(
@@ -59,7 +72,11 @@ export default function RootLayout({
         }}
       >
         <SplashScreen />
-        <Provider>{children}</Provider>
+        <Provider>
+          {children}
+          <Analytics />
+          <SpeedInsights />
+        </Provider>
       </body>
     </html>
   );

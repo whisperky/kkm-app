@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import BottomNavbarOverlayImage from "@/_assets/bottom-navbar-overlay.png";
 import {
-  ButtonStone,
   CalendarDarkIcon,
   NFTDarkIcon,
   PlayDarkIcon,
@@ -10,9 +9,16 @@ import {
   StatsDarkIcon,
 } from "@/src/_components/icons";
 import MainDialog from "../main-dialog";
-import { detectDeviceType } from "@/src/_utils/deviceUtils";
+import {
+  BREAKPOINTS,
+  detectDeviceType,
+  IMAGE_WIDTHS,
+} from "@/src/_utils/deviceUtils";
 import PoweredByAvalache from "@/_assets/powered-avalanche.png";
 import useActions from "@/src/_hooks/useAction";
+import Head from "next/head";
+import { cn } from "@/lib/utils";
+import { ButtonStone } from "@/src/_components/shared/ButtonStone";
 
 const tabItems = [
   {
@@ -73,7 +79,9 @@ export default function BottomTabBar({
   const { saveAction } = useActions();
   const [tabState, setTabState] = useState(initialTabState);
   const [deviceType, setDeviceType] = useState("Other");
-  const showImage = useRef<boolean>(false);
+
+  const [screenWidth, setScreenWidth] = useState(0);
+   const showImage = useRef<boolean>(false);
   const imageElement = useRef<HTMLImageElement | null>(null);
 
   useEffect(() => {
@@ -95,12 +103,28 @@ export default function BottomTabBar({
     return () => clearInterval(intervalId);
   }, []);
 
+
+
+  useEffect(() => {
+    setScreenWidth(window.innerWidth);
+    const handleResize = () => setScreenWidth(window.innerWidth);
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const handleTabClick = (item: (typeof tabItems)[0]) => {
     const clickedTitle = item.dialogTitle ?? item.label;
 
     if (clickedTitle !== tabState.title) {
       if (clickedTitle === "Play") {
-        setTabState(initialTabState);
+        setTabState((prevState) => ({
+          ...prevState,
+          title: clickedTitle,
+          openDialog: false,
+          isolate: false,
+          opened: "play",
+        }));
         setIsModalOpen(false);
       } else {
         setTabState((prevState) => ({
@@ -115,34 +139,58 @@ export default function BottomTabBar({
     }
   };
 
-  const setOpened = (opened: string | null) => {
+  const setOpened = (opened: string | null) =>
     setTabState((prev) => ({ ...prev, opened }));
-  };
 
-  const setOpenDialog = (openDialog: boolean) => {
+  const setOpenDialog = (openDialog: boolean) =>
     setTabState((prev) => ({ ...prev, openDialog }));
+
+  const getOptimalImageWidth = () => {
+    if (screenWidth <= BREAKPOINTS.sm) return IMAGE_WIDTHS.sm;
+    if (screenWidth <= BREAKPOINTS.md) return IMAGE_WIDTHS.md;
+    return IMAGE_WIDTHS.lg;
   };
 
   return (
     <>
+      <Head>
+        <link
+          rel="preload"
+          href={BottomNavbarOverlayImage.src}
+          as="image"
+          type="image/png"
+        />
+      </Head>
       <div className="mt-auto relative w-full h-36 overflow-hidden">
         <Image
           priority
           alt="Bottom Navbar Image"
           src={BottomNavbarOverlayImage}
-          width={1000}
-          className={`w-full block absolute ${
+          width={getOptimalImageWidth()}
+          className={cn(
+            `w-full block absolute h-full`,
             deviceType === "Android" ? "-bottom-3" : "bottom-0"
-          } h-full`}
+          )}
+          sizes={`
+            (max-width: ${BREAKPOINTS.sm}px) ${IMAGE_WIDTHS.sm}px,
+            (max-width: ${BREAKPOINTS.md}px) ${IMAGE_WIDTHS.md}px,
+            ${IMAGE_WIDTHS.lg}px
+          `}
+          quality={85}
+          placeholder="blur"
+          blurDataURL={BottomNavbarOverlayImage.blurDataURL}
+          unoptimized={false}
         />
         <div
-          className={`w-full ${
-            deviceType === "Android" ? "pt-8" : "pt-6"
-          } px-4 grid grid-cols-5 relative items-center`}
+          className={cn(
+            `w-full px-[4%] grid grid-cols-5 relative items-center`,
+            deviceType === "Android" ? "pt-9" : "pt-6"
+          )}
         >
           {tabItems.map((item) => (
             <ButtonStone
               key={item.key}
+              screenWidth={screenWidth}
               onClick={() => {
                 handleTabClick(item);
                 saveAction(item?.actionName);
@@ -167,6 +215,7 @@ export default function BottomTabBar({
           className="absolute left-1/2 translate-x-[-50%] top-9 z-[200] pointer-events-none opacity-100 transition-opacity duration-50"
           ref={imageElement}
           style={{ display: "none" }}
+          unoptimized
         />
       </div>
       {tabItems.some((i) => i.key === tabState.opened) && (

@@ -29,21 +29,21 @@ function SplashScreen() {
     const timerScroll = setTimeout(() => {
       const scrollToEnd = () => {
         const currentElement = splashRef.current as HTMLElement | null;
-        if (currentElement) {
+        if (currentElement)
           currentElement?.scrollTo?.({
             top: currentElement.scrollHeight,
             behavior: "smooth",
           });
-        }
       };
       scrollToEnd();
     }, duration + 1000);
 
     const timerOpacity = setTimeout(() => setOpacity(0), duration + 1500);
 
-    const timerRemoveSplash = setTimeout(() => {
-      setShowSplash(false);
-    }, duration + 2000);
+    const timerRemoveSplash = setTimeout(
+      () => setShowSplash(false),
+      duration + 2000
+    );
 
     return () => {
       clearInterval(timerProgress);
@@ -67,15 +67,6 @@ function SplashScreen() {
           backgroundImage: `url(/images/season-zero-splash.jpg)`,
         }}
       >
-        {/* <div className="absolute inset-0 bg-black bg-opacity-35"></div> */}
-        {/* <div className="flex font-made-tommy flex-col items-center z-10 w-3/4 animate-slide-and-settle">
-          <h1 className="text-3xl leading-8 font-extrabold text-center text-white">
-            One Million
-          </h1>
-          <h1 className="text-3xl leading-8 font-[900] text-center text-white">
-            and One Kokos
-          </h1>
-        </div> */}
         <div className="grid gap-2.5 mt-8">
           <Image
             alt="One million and one kokos"
@@ -86,7 +77,7 @@ function SplashScreen() {
             width={400}
             className="w-60"
           />
-          <Image 
+          <Image
             alt="Season One"
             src={"/images/season-one.png"}
             priority={true}
@@ -191,9 +182,6 @@ function SplashScreen() {
               </defs>
             </svg>
           </div>
-          {/* <div className="text-center font-made-tommy text-white/0 font-semibold">
-            <p>Kokomo Games</p>
-          </div> */}
         </div>
       </div>
       <div className="w-full h-[80vh] bg-[#BF82FF]" />

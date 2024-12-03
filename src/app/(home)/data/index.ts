@@ -1,4 +1,3 @@
-import { StaticImageData } from "next/image";
 import ShareTweetTask from "../_components/share-tweet";
 
 import kokomoIcon from "@/_assets/icons/kokomo-1.png";
@@ -28,7 +27,7 @@ interface CollectorItem {
   price: number;
   purchased?: boolean;
   claimed?: boolean;
-  icon: StaticImageData;
+  icon: any;
 }
 
 interface CatchUpItem {
@@ -40,7 +39,7 @@ interface CatchUpItem {
   price: number;
   purchased?: boolean;
   claimed?: boolean;
-  icon: StaticImageData;
+  icon: any;
   isPopular?: boolean;
 }
 
@@ -287,7 +286,7 @@ const collectorPassData: CollectorItem[] = [
     id: 6,
     title: 'Kokomo Collectibles',
     price: 1,
-    icon: kokomoIcon6,
+    icon: kokomoIcon6.src,
   },
 ];
 

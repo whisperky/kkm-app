@@ -1,27 +1,24 @@
 "use client";
+
 import { useCallback, useContext, useEffect, useState } from "react";
-import { RangeColorMap } from "../../../../_utils/background-pixers";
 import { cn } from "@/lib/utils";
 import { MatchContext } from "../_context/match";
 import { SocketContext } from "../_context/socket";
 import { GeneralContext } from "@/src/app/general-context";
 import React from "react";
+import { BoxContext } from "../_context/boxContext";
 
 interface ICheckboxButtonProps {
   index: number;
-  score: number;
   className?: string;
-  cellColorRange?: RangeColorMap;
-  playClickAudio?: () => void;
 }
 
 export default function CheckboxButton({
   index,
-  cellColorRange,
   className,
-  playClickAudio,
 }: ICheckboxButtonProps) {
-  const { sessionId } = useContext(GeneralContext);
+  const { playClickAudio } = useContext(BoxContext)
+  const { sessionId, username } = useContext(GeneralContext);
   const { sendMessage } = useContext(SocketContext);
   const { checkedBoxes, myCheckedBoxes, toggleBox, match, matchId } =
     useContext(MatchContext);
@@ -35,9 +32,10 @@ export default function CheckboxButton({
 
       const message = {
         roomId: matchId,
-        username: sessionId,
-        sessionId,
-        boxId: koko?.key?.toString(),
+        username,
+        sessionId: `${sessionId}`,
+        photoUrl: ``,
+        boxId: Number(koko?.key),
         isChecked: !koko?.checked,
         timestamp: new Date().toISOString(),
       };
@@ -55,7 +53,7 @@ export default function CheckboxButton({
         matchId: koko?.matchId,
       });
     },
-    [matchId, myCheck, playClickAudio, sendMessage, sessionId, toggleBox]
+    [matchId, myCheck, playClickAudio, sendMessage, sessionId, toggleBox, username]
   );
 
   useEffect(() => {
@@ -87,7 +85,6 @@ export default function CheckboxButton({
             "relative select-none size-6 text-[1.3rem] text-center flex justify-center items-center p-2 py-[6px] w-full h-9",
             className
           )}
-          style={{ backgroundColor: `${cellColorRange?.getLineColor(index)}` }}
           onClick={handleClick}
         >
           <div
@@ -105,7 +102,6 @@ export default function CheckboxButton({
           koko-id={index}
           onClick={handleClick}
           className="flex justify-center items-center p-[6px] w-full"
-          style={{ backgroundColor: `${cellColorRange?.getLineColor(index)}` }}
         >
           <div
             className="

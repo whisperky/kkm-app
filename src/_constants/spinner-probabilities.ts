@@ -19,13 +19,13 @@ export const spinnerProbability = [
   },
   {
     kokos: 4,
-    prob: 0.085,
+    prob: 0.0085,
     type: "USDT",
     value: 0.1,
   },
   {
     kokos: 5,
-    prob: 0.035,
+    prob: 0.0035,
     type: "USDT",
     value: 0.25,
   },
@@ -37,7 +37,7 @@ export const spinnerProbability = [
   },
   {
     kokos: 7,
-    prob: 0.000025,
+    prob: 0.0000025,
     type: "USDT",
     value: 5,
   },
@@ -49,7 +49,7 @@ export const spinnerProbability = [
   },
   {
     kokos: 9,
-    prob: 0.000000015,
+    prob: 0.000000000015,
     type: "USDT",
     value: 50,
   },

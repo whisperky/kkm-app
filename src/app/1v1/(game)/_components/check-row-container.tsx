@@ -12,7 +12,6 @@ export default function CheckboxRowContainer({
   ref,
   colorRange,
   cellColorRange,
-  playClickAudio,
 }: {
   chunk: Omit<PvPGameKokoType, "key">[];
   startFrom: number;
@@ -45,9 +44,6 @@ export default function CheckboxRowContainer({
           <CheckboxButton
             key={key}
             index={key}
-            score={koko.score}
-            cellColorRange={cellColorRange}
-            playClickAudio={playClickAudio}
           />
         );
       })}

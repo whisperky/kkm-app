@@ -9,7 +9,7 @@ const coconutFacts = [
   "Coconuts float!",
   "Coconuts can survive long sea journeys!",
   "Coconut water is sterile!",
-  "Young coconuts are green!",
+  "Your coconuts are green!",
   "Coconut milk is lactose-free!",
   "The Coconut tree is the national tree of the Maldives!",
   "Coconut oil can act as a natural sunscreen!",

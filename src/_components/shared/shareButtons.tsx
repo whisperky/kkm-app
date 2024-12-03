@@ -25,21 +25,26 @@ export default function ShareButtons({
     []
   );
 
+  const link = useMemo(
+    () => `${botURL}?start=rs_${sessionId}`,
+    [botURL, sessionId]
+  );
+
   const handleShare = useCallback(async () => {
     try {
-      await window.navigator.clipboard.writeText(
-        `${botURL}?start=rs_${sessionId}`
-      );
+      await window.navigator.clipboard.writeText(`Play 1M1 with me for a FREE OG NFT! 🥥\n📈 Farm P2A points\n⚔️ Challenge friends in PvP tapping\n🤑 Free daily spin for real USDT \n\n ${link}`);
       toast.success("Invite Link copied to clipboard");
       saveAction(copyName);
+      saveAction('socialFi_copyLink_click');
     } catch (e) {
       toast.error("Copy not supported");
     }
-  }, [botURL, copyName, saveAction, sessionId]);
+  }, [copyName, link, saveAction]);
 
   const handleTelegramShareClick = useCallback(async () => {
     try {
       saveAction(shareName);
+      saveAction('socialFi_inviteTG_click');
     } catch (e) {
       console.log(e);
       toast.error("Error tracking Telegram Share click");
@@ -49,8 +54,8 @@ export default function ShareButtons({
   return (
     <>
       <TelegramShareButton
-        url={`${botURL}?start=rs_${sessionId}`}
-        title="Join me on One Million and One Kokos. You can claim a free Kokomo OG NFT inside!"
+        title={`Play 1M1 with me for a FREE OG NFT! 🥥\n📈 Farm P2A points\n⚔️ Challenge friends in PvP tapping\n🤑 Free daily spin for real USDT \n\n ${link}`}
+        url=" "
         onClick={handleTelegramShareClick}
         className={`!py-2 h-auto flex-1 flex items-center justify-center gap-1 rounded-md hover:!bg-green/80 !text-white !font-made-tommy !font-bold btn-animate !shadow-[0_0.15rem] !bg-green !shadow-[#2C7C4C]`}
       >
