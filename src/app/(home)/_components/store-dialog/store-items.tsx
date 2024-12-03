@@ -9,7 +9,7 @@ import moment from "moment";
 
 export default function StoreSection() {
   const [WebApp, setWebApp] = useState<any>(null);
-  const { sessionId, refreshMyScore } = useContext(GeneralContext);
+  const { sessionId } = useContext(GeneralContext);
   const { data, refetch } = useStoreItems(sessionId);
   const { mutateAsync } = useBuyStore();
 
@@ -65,9 +65,6 @@ export default function StoreSection() {
           WebApp.openInvoice(invoiceLink, async (status: string) => {
             if (status === "paid") {
               await refetch();
-              setTimeout(async () => {
-                await refreshMyScore?.();
-              }, 5000);
               toast.success("Payment successful");
             }
           });
