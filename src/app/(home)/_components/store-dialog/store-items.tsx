@@ -32,10 +32,7 @@ export default function StoreSection() {
     () =>
       Object.entries(
         Object.groupBy(data?.data?.data || [], (one) => one?.type?.name)
-      ).map(([type, items]): [string, any[]] => [
-        type,
-        [...(items || [])].reverse(),
-      ]),
+      ),
     [data?.data?.data]
   );
 
