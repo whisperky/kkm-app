@@ -70,7 +70,7 @@ const DialogContent = React.forwardRef<
         // eslint-disable-next-line jsx-a11y/aria-props
         aria-describedby=""
         className={cn(
-          `fixed px-3 left-[50%] border-none outline-none top-1/2 ${
+          `fixed px-3 pb-6 left-[50%] border-none outline-none top-1/2 ${
             isStoreBoard || isClaimBoard
               ? "mt-0"
               : size === "sm"
