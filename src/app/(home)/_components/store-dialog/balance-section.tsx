@@ -31,8 +31,12 @@ export default function BalanceSection({
   customActions?: React.ReactNode;
   className?: string;
 }) {
-  const { myScore, isLoadingMyScore, myUsdt, isLoadingMyUsdt } =
-    useContext(GeneralContext);
+  const {
+    myScore,
+    isLoadingMyScore,
+    // myUsdt,
+    // isLoadingMyUsdt
+  } = useContext(GeneralContext);
 
   return (
     <section
