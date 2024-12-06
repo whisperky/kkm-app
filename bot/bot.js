@@ -386,7 +386,7 @@ Hit <b>Play Now</b> to start earning Kokomo Points - Kokos 🥥
               [
                 {
                   text: "🎮 Play Now",
-                  url: `https://t.me/One_Million_One_bot/game_on`,
+                  url: `${HOST_URL}`,
                 },
               ],
               [
