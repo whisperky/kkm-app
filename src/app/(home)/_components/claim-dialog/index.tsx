@@ -9,6 +9,7 @@ import {
   Dialog,
   DialogClose,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/src/_components/ui/dialog";
 import StoreItem from "@/src/app/(home)/_components/store-dialog/item-card";
@@ -45,6 +46,7 @@ export default function ClaimDialog({
     current_day?: number;
     last_update?: Date;
     itemId?: string;
+    star?: boolean;
   };
 }) {
   const [walletValue, setWalletValue] = useState("");
@@ -84,8 +86,11 @@ export default function ClaimDialog({
         containerClassName="flex flex-col !overflow-hidden !max-h-[75dvh]"
         isClaimBoard
       >
+        <DialogTitle className="sr-only">
+          {type === "store" ? "Claim a new collectible everyday!" : data?.title}
+        </DialogTitle>
         <BoxMain hideClose className="rounded-t-3xl">
-          <div className="z-20 px-2 text-center font-bumper-sticker text-3xl text-[#491F36] stroke-[linear-gradient(to right, #B4704A, #F4A860)]">
+          <div className="z-20 px-2 text-center font-bumper-sticker text-[26px] text-[#491F36] stroke-[linear-gradient(to right, #B4704A, #F4A860)]">
             {type === "store"
               ? "Claim a new collectible everyday!"
               : data?.title}
@@ -98,7 +103,7 @@ export default function ClaimDialog({
                     <StoreItem
                       key={index}
                       id={index}
-                      title={`Day ${index}: ${data?.title}`}
+                      title={`${item.title} #${index + 1}`}
                       type="claim"
                       price={0}
                       purchased={true}
@@ -136,20 +141,21 @@ export default function ClaimDialog({
                     height={120}
                     className="py-6 z-[1]"
                   />
-
-                  <Image
-                    src={starBgIcon}
-                    alt="Star background"
-                    width={188}
-                    height={188}
-                    className="absolute bottom-[calc(50%-94px)] left-[calc(50%-94px)] z-0"
-                  />
+                  {data?.star && (
+                    <Image
+                      src={starBgIcon}
+                      alt="Star background"
+                      width={188}
+                      height={188}
+                      className="absolute bottom-[calc(50%-94px)] left-[calc(50%-94px)] z-0"
+                    />
+                  )}
                 </div>
                 <div className="flex flex-col items-center justify-center text-base font-bold text-[#745061] font-made-tommy">
                   {data?.rewards
                     ? Object.entries(data?.rewards).map(([key, value]) => (
                         <p key={key}>
-                          {value} {key}
+                          {value} {key.charAt(0).toUpperCase() + key.slice(1)}
                         </p>
                       ))
                     : data?.title}
@@ -169,7 +175,7 @@ export default function ClaimDialog({
                     onClick={handleBuy}
                     disabled={loading}
                     className={cn(
-                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99] hover:bg-neutral-500 active:bg-neutral-600",
+                      "w-full bg-green px-3 py-0 text-xl text-[#EFF6FF] font-made-tommy font-extrabold rounded-lg shadow-[0_1px_0_0_#5F3F57] z-[99] hover:bg-green active:bg-neutral-600",
                       "flex gap-2 items-center"
                     )}
                   >
@@ -183,11 +189,11 @@ export default function ClaimDialog({
             )}
           </BoxContent>
           <DialogClose asChild>
-            <button className="absolute w-[86px] h-3 -bottom-2 left-[calc(50%-43px)]">
+            <button className="absolute w-[86px] h-11 -bottom-6 left-[calc(50%-43px)] z-30">
               <Image
                 src={close}
                 alt="Close"
-                className="absolute -top-4 left-[calc(50%-22px)] w-11 h-11"
+                className="absolute top-0 left-[calc(50%-22px)] w-11 h-11"
               />
               <Image src={bottomBoard} alt="Bottom board" />
             </button>

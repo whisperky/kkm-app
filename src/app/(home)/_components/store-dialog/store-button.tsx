@@ -42,9 +42,6 @@ export const StoreButton = () => {
         <StoreModal>
           <div className="relative">
             <Image src={Store} alt="Store icon" width={72} height={94} />
-            <span className="text-white text-[12px] font-bold absolute bottom-5 right-[10px] text-right select-none">
-              Store
-            </span>
           </div>
         </StoreModal>
       </motion.div>

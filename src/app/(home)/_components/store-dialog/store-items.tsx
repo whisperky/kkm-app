@@ -9,7 +9,7 @@ import moment from "moment";
 
 export default function StoreSection() {
   const [WebApp, setWebApp] = useState<any>(null);
-  const { sessionId } = useContext(GeneralContext);
+  const { sessionId, refreshMyScore } = useContext(GeneralContext);
   const { data, refetch } = useStoreItems(sessionId);
   const { mutateAsync } = useBuyStore();
 
@@ -28,18 +28,20 @@ export default function StoreSection() {
     loadWebApp();
   }, []);
 
-  const itemGroups = useMemo(
-    () =>
-      Object.entries(
-        Object.groupBy(data?.data?.data || [], (one) => one?.type?.name)
-      ),
-    [data?.data?.data]
-  );
+  const itemGroups = useMemo(() => {
+    const groupedItems = (data?.data?.data || []).reduce((acc, item) => {
+      const type = item?.type?.name || "";
+      if (!acc[type]) {
+        acc[type] = [];
+      }
+      acc[type].push(item);
+      return acc;
+    }, {} as Record<string, any[]>);
 
-  useEffect(() => {
-    console.log("data", data);
-    console.log("itemGroups", itemGroups);
-  }, [data, itemGroups]);
+    return Object.entries(groupedItems).map(
+      ([type, items]): [string, any[]] => [type, [...(items || [])].reverse()]
+    );
+  }, [data?.data?.data]);
 
   const handleBuy = useCallback(
     async ({
@@ -65,6 +67,9 @@ export default function StoreSection() {
           WebApp.openInvoice(invoiceLink, async (status: string) => {
             if (status === "paid") {
               await refetch();
+              setTimeout(async () => {
+                await refreshMyScore?.();
+              }, 5000);
               toast.success("Payment successful");
             }
           });
@@ -77,6 +82,11 @@ export default function StoreSection() {
     },
     [mutateAsync, refetch, WebApp]
   );
+
+  useEffect(() => {
+    console.log("data", data);
+    console.log("itemGroups", itemGroups);
+  }, [data, itemGroups]);
 
   // Rest of the component remains the same...
   return (
@@ -99,7 +109,7 @@ export default function StoreSection() {
                     title={item.name}
                     type={items?.[0]?.type?.key}
                     price={item.price}
-                    purchased={!!item?.user_items?.[0]}
+                    purchased={true || !!item?.user_items?.[0]}
                     icon={item?.details?.icon || "/images/store/kokomo-1.png"}
                     star={item?.details?.star}
                     isPopular={item?.details?.isPopular}

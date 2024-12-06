@@ -51,24 +51,7 @@ export default function BalanceSection({
           </span>
         </p>
       </article>
-      <article className="flex flex-1 flex-col w-fit items-center text-sm text-golden-brown font-semibold space-y-1">
-        <p>Winnings</p>
-        <p className="w-full p-1 px-2 rounded-full bg-golden-brown text-white">
-          <span className="flex w-full gap-2 items-center justify-center">
-            <span>
-              ${" "}
-              {isNaN(Number(myUsdt))
-                ? myUsdt
-                : Intl.NumberFormat(undefined, {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }).format(Number(myUsdt))}
-            </span>
-
-            {isLoadingMyUsdt && <LoadingSpinner />}
-          </span>
-        </p>
-      </article>
+      <article className="flex-1" />
     </section>
   );
 }

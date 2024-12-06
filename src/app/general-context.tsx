@@ -63,7 +63,7 @@ export function GeneralContextProvider({
   const router = useRouter();
   const pathName = usePathname();
   const sessionId = useMemo(
-    () => (webApp?.initDataUnsafe?.user?.id as TSessionId) || `${20001}`,
+    () => (webApp?.initDataUnsafe?.user?.id as TSessionId),
     [webApp?.initDataUnsafe?.user?.id]
   );
   const username = useMemo(

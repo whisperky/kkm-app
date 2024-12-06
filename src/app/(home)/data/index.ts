@@ -252,39 +252,39 @@ const partnerTasks: Task[] = [
 const collectorPassData: CollectorItem[] = [
   {
     id: 1,
-    title: 'Kokomo Collectibles',
-    price: 0.40,
+    title: "Kokomo Collectible",
+    price: 0.4,
     icon: kokomoIcon,
     claimed: true,
   },
   {
     id: 2,
-    title: 'Kokomo Collectibles',
-    price: 0.40,
+    title: "Kokomo Collectible",
+    price: 0.4,
     icon: kokomoIcon2,
   },
   {
     id: 3,
-    title: "Kokomo Collectibles",
-    price: 0.50,
+    title: "Kokomo Collectible",
+    price: 0.5,
     icon: kokomoIcon3,
   },
   {
     id: 4,
-    title: 'Kokomo Collectibles',
-    price: 0.70,
+    title: "Kokomo Collectible",
+    price: 0.7,
     purchased: true,
     icon: kokomoIcon4,
   },
   {
     id: 5,
-    title: "Kokomo Collectibles",
-    price: 0.80,
+    title: "Kokomo Collectible",
+    price: 0.8,
     icon: kokomoIcon5,
   },
   {
     id: 6,
-    title: 'Kokomo Collectibles',
+    title: "Kokomo Collectible",
     price: 1,
     icon: kokomoIcon6.src,
   },
@@ -293,7 +293,7 @@ const collectorPassData: CollectorItem[] = [
 const catchUpBundlesData: CatchUpItem[] = [
   {
     id: 1,
-    title: '5,000 Kokos 1 Spin',
+    title: "5000 Kokos 1 Spin",
     collectibles: 1,
     kokos: 5000,
     spins: 1,
@@ -302,7 +302,7 @@ const catchUpBundlesData: CatchUpItem[] = [
   },
   {
     id: 2,
-    title: '25,000 Kokos 5 Spins',
+    title: "25000 Kokos 5 Spins",
     collectibles: 2,
     kokos: 25000,
     spins: 5,
@@ -311,12 +311,12 @@ const catchUpBundlesData: CatchUpItem[] = [
   },
   {
     id: 3,
-    title: 'Kokomo Mega Bundle',
+    title: "Kokomo Mega Bundle",
     icon: kokomonIcon,
     collectibles: 4,
     kokos: 100000,
     spins: 12,
-    price: 3.50,
+    price: 3.5,
     isPopular: true,
   },
 ];

@@ -2,10 +2,11 @@ import { NextResponse, userAgent, type NextRequest } from "next/server";
 
 export function middleware(request: NextRequest) {
   const ua = userAgent(request);
-  const device = (ua.device.type ?? "desktop").toLowerCase()
-  if (!device.includes("mobile")) {
-    return NextResponse.redirect(new URL("/not-mobile", request.url));
-  }
+  console.log(ua);
+  // const device = (ua.device.type ?? "desktop").toLowerCase()
+  // if (!device.includes("mobile")) {
+  //   return NextResponse.redirect(new URL("/not-mobile", request.url));
+  // }
   return NextResponse.next();
 
   // return NextResponse.redirect(new URL("/updating", request.url));

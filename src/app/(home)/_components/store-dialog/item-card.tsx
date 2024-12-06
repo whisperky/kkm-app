@@ -88,7 +88,7 @@ const UnlockableOverlay = ({
             Come back to Collect!
           </p>
           <p className="text-purple text-[10px] text-center font-medium px-2">
-            Day {id}
+            Day {Number(id) + 1}
           </p>
         </>
       )}
@@ -122,7 +122,16 @@ export default function StoreItem({
         <ClaimDialog
           onClick={(e) => onClick?.("buy", e)}
           type={type}
-          data={{ title, price, icon, rewards, current_day, last_update, itemId }}
+          data={{
+            title,
+            price,
+            icon,
+            rewards,
+            current_day,
+            last_update,
+            itemId,
+            star,
+          }}
         >
           <div className="flex w-full items-center justify-center rounded-lg drop-shadow-[0_1px_0px_#00000029]">
             {`$${price}`}
@@ -135,10 +144,18 @@ export default function StoreItem({
           <ClaimDialog
             onClick={(e) => onClick?.("claim", e)}
             type="store"
-            data={{ title, price, icon, rewards, current_day, last_update, itemId }}
+            data={{
+              title,
+              price,
+              icon,
+              rewards,
+              current_day,
+              last_update,
+              itemId,
+            }}
           >
             <div className="flex w-full items-center justify-center drop-shadow-[0_1px_0px_#00000029]">
-              <Image src={claimIcon} alt="Claim" width={16} height={16} />
+              <Image src={claimIcon} alt="Claim" width={12} height={12} />
               Claim
             </div>
           </ClaimDialog>
@@ -226,13 +243,15 @@ export default function StoreItem({
       <Button
         className={cn(
           "w-full h-6 p-0 text-sm text-white font-made-tommy font-extrabold rounded-b-lg rounded-t-none shadow-[0_1px_0_0_#5F3F57] drop-shadow-[0_1px_0px_#00000029] z-20 hover:bg-neutral-500 active:bg-neutral-600",
-          type === "claim"
+          type === "bundle"
+            ? "bg-green hover:bg-green"
+            : type === "claim"
             ? claimed
-              ? "bg-green"
-              : "bg-purple"
+              ? "bg-green hover:bg-green"
+              : "bg-purple hover:bg-purple"
             : purchased
-            ? "bg-purple"
-            : "bg-green"
+            ? "bg-purple hover:bg-purple"
+            : "bg-green hover:bg-green"
         )}
       >
         {renderButtonContent()}
